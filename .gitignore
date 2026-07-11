@@ -30,6 +30,18 @@ yarn-error.log*
 # vercel
 .vercel
 
+# leftover subfolder (legacy)
+/lifeos/
+
+# agent configs (not app code)
+.agents/
+.claude/
+.kilocode/
+.qwen/
+.zcode/
+.zencoder/
+skills-lock.json
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

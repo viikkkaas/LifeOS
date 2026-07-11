@@ -6,37 +6,106 @@ import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   LayoutDashboard, Target, BarChart3, Settings, Calendar, Clock,
-  BookOpen, CheckSquare, Briefcase, TrendingUp, Image as ImageIcon,
-  Layout, Trophy, DollarSign, Wallet, Menu, X, Calculator,
+  BookOpen, CheckSquare, Trophy, TrendingUp, Wallet,
+  Menu, X, ChevronDown, Briefcase,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-const navItems = [
+interface NavItem {
+  href: string
+  label: string
+  icon: any
+  exact?: boolean
+}
+
+interface NavGroup {
+  label: string
+  icon: any
+  items: NavItem[]
+}
+
+const groups: NavGroup[] = [
+  {
+    label: "Money",
+    icon: Wallet,
+    items: [
+      { href: "/net-worth", label: "Net Worth", icon: Wallet },
+      { href: "/investments", label: "Investments", icon: TrendingUp },
+      { href: "/business", label: "Business", icon: Briefcase },
+      { href: "/analytics", label: "Analytics", icon: BarChart3 },
+    ],
+  },
+  {
+    label: "Goals",
+    icon: Target,
+    items: [
+      { href: "/goals", label: "Goals Hub", icon: Target },
+    ],
+  },
+  {
+    label: "Life",
+    icon: CheckSquare,
+    items: [
+      { href: "/habits", label: "Habits", icon: CheckSquare },
+      { href: "/journal", label: "Journal", icon: BookOpen },
+      { href: "/timeline", label: "Timeline", icon: Clock },
+      { href: "/calendar", label: "Calendar", icon: Calendar },
+      { href: "/achievements", label: "Achievements", icon: Trophy },
+    ],
+  },
+]
+
+const standaloneItems: NavItem[] = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { href: "/goals", label: "Goals", icon: Target },
-  { href: "/dream-wall", label: "Dream Wall", icon: ImageIcon },
-  { href: "/vision-board", label: "Vision Board", icon: Layout },
-  { href: "/analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/simulator", label: "Simulator", icon: Calculator },
-  { href: "/net-worth", label: "Net Worth", icon: Wallet },
-  { href: "/investments", label: "Investments", icon: TrendingUp },
-  { href: "/business", label: "Business", icon: Briefcase },
-  { href: "/timeline", label: "Timeline", icon: Clock },
-  { href: "/calendar", label: "Calendar", icon: Calendar },
-  { href: "/achievements", label: "Achievements", icon: Trophy },
-  { href: "/habits", label: "Habits", icon: CheckSquare },
-  { href: "/journal", label: "Journal", icon: BookOpen },
   { href: "/settings", label: "Settings", icon: Settings },
 ]
 
 export default function Sidebar() {
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
+    Money: true,
+    Goals: true,
+    Life: true,
+  })
 
-  const isActive = (item: typeof navItems[0]) => {
+  const toggleGroup = (label: string) => {
+    setExpandedGroups(prev => ({ ...prev, [label]: !prev[label] }))
+  }
+
+  const isActive = (item: NavItem) => {
     if (item.exact) return pathname === item.href
+    if (item.href === "/goals") {
+      return pathname === "/goals" || pathname === "/dream-wall" || pathname === "/vision-board" || pathname === "/simulator"
+    }
     return pathname.startsWith(item.href)
   }
+
+  const isGroupActive = (group: NavGroup) => {
+    return group.items.some(item => isActive(item))
+  }
+
+  const navLink = (item: NavItem, onClick?: () => void) => {
+    const active = isActive(item)
+    return (
+      <Link
+        key={item.href}
+        href={item.href}
+        onClick={onClick}
+        className={cn(
+          "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+          active
+            ? "bg-gradient-to-r from-[#667eea]/10 to-[#764ba2]/10 text-white border border-white/[0.06]"
+            : "text-white/50 hover:text-white/80 hover:bg-white/[0.02]"
+        )}
+      >
+        <item.icon size={18} className={active ? "text-[#667eea]" : "shrink-0"} />
+        {item.label}
+      </Link>
+    )
+  }
+
+  const handleNav = () => setMobileOpen(false)
 
   return (
     <>
@@ -67,7 +136,7 @@ export default function Sidebar() {
         mobileOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="flex items-center justify-between p-5 border-b border-white/[0.04]">
-          <Link href="/" className="flex items-center gap-2.5">
+          <Link href="/" className="flex items-center gap-2.5" onClick={handleNav}>
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#667eea] to-[#764ba2] flex items-center justify-center">
               <span className="text-white font-bold text-sm">L</span>
             </div>
@@ -80,31 +149,56 @@ export default function Sidebar() {
           </button>
         </div>
 
-        <nav className="p-3 space-y-0.5">
-          {navItems.map((item) => {
-            const active = isActive(item)
+        <nav className="p-3 space-y-1">
+          {standaloneItems.map(item => navLink(item, handleNav))}
+
+          {groups.map(group => {
+            const groupActive = isGroupActive(group)
+            const expanded = expandedGroups[group.label]
             return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setMobileOpen(false)}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
-                  active
-                    ? "bg-gradient-to-r from-[#667eea]/10 to-[#764ba2]/10 text-white border border-white/[0.06]"
-                    : "text-white/50 hover:text-white/80 hover:bg-white/[0.02]"
-                )}
-              >
-                <item.icon size={18} className={active ? "text-[#667eea]" : ""} />
-                {item.label}
-              </Link>
+              <div key={group.label} className="pt-2">
+                <button
+                  onClick={() => toggleGroup(group.label)}
+                  className={cn(
+                    "flex items-center justify-between w-full px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors",
+                    groupActive ? "text-white/60" : "text-white/30 hover:text-white/50"
+                  )}
+                >
+                  <div className="flex items-center gap-2">
+                    <group.icon size={14} />
+                    <span>{group.label}</span>
+                  </div>
+                  <motion.div
+                    animate={{ rotate: expanded ? 180 : 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <ChevronDown size={14} />
+                  </motion.div>
+                </button>
+                <AnimatePresence initial={false}>
+                  {expanded && (
+                    <motion.div
+                      key="content"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2, ease: "easeInOut" }}
+                      className="overflow-hidden"
+                    >
+                      <div className="pl-2 pt-0.5 space-y-0.5">
+                        {group.items.map(item => navLink(item, handleNav))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             )
           })}
         </nav>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/[0.04]">
+        <div className="p-4 border-t border-white/[0.04] mt-2">
           <div className="text-xs text-white/30 text-center">
-            LifeOS v1.0
+            Track your goals, money, and life in one place.
           </div>
         </div>
       </aside>

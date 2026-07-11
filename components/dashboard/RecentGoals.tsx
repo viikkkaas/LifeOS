@@ -48,7 +48,7 @@ export default function RecentGoals({ goals, symbol }: RecentGoalsProps) {
                 {goal.name}
               </h3>
               <div className="flex items-center justify-between text-xs text-white/40 mb-2">
-                <span>{symbol}{formatCompactCurrency(goal.amountSaved)} / {symbol}{formatCompactCurrency(goal.targetPrice)}</span>
+                <span>{formatCompactCurrency(goal.amountSaved, symbol)} / {formatCompactCurrency(goal.targetPrice, symbol)}</span>
                 <span className="font-medium text-white/60">{progress}%</span>
               </div>
               <div className="progress-bar">

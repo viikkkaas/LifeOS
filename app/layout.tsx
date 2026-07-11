@@ -4,8 +4,8 @@ import { Toaster } from "react-hot-toast"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "LifeOS - Your Financial Operating System",
-  description: "Track dreams, goals, and financial progress",
+  title: "LifeOS - Track your goals, money, and life",
+  description: "Track your goals, money, and life in one place.",
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

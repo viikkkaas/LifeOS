@@ -96,8 +96,8 @@ export default function GoalCard({ goal, symbol, dispatch, locked }: GoalCardPro
           {/* Progress Bar */}
           <div className="mb-3">
             <div className="flex items-center justify-between text-xs mb-1.5">
-              <span className="text-white/60">{symbol}{formatCompactCurrency(goal.amountSaved)}</span>
-              <span className="text-white/40">of {symbol}{formatCompactCurrency(goal.targetPrice)}</span>
+              <span className="text-white/60">{formatCompactCurrency(goal.amountSaved, symbol)}</span>
+              <span className="text-white/40">of {formatCompactCurrency(goal.targetPrice, symbol)}</span>
               <span className="font-semibold text-white/80">{progress}%</span>
             </div>
             <div className="progress-bar h-2">
@@ -121,7 +121,7 @@ export default function GoalCard({ goal, symbol, dispatch, locked }: GoalCardPro
 
           {/* Remaining + Countdown */}
           <div className="text-xs text-white/40 mb-3">
-            <span>Remaining: {symbol}{formatCompactCurrency(remaining)}</span>
+            <span>Remaining: {formatCompactCurrency(remaining, symbol)}</span>
             {monthsNeeded && monthsNeeded > 0 && (
               <span className="ml-3 text-purple-300">
                 ~{monthsNeeded} month{monthsNeeded > 1 ? 's' : ''}

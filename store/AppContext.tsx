@@ -53,7 +53,10 @@ function calculateStats(data: AppData): Stats {
   const averageGoalPrice = totalGoals > 0 ? Math.round(totalDreamCost / totalGoals) : 0
   const mostExpensive = goals.length > 0 ? goals.reduce((a, b) => a.targetPrice > b.targetPrice ? a : b) : null
   const cheapest = goals.length > 0 ? goals.filter(g => !g.purchased).reduce((a, b) => a.targetPrice < b.targetPrice ? a : b) : null
-  const overallCompletion = totalDreamCost > 0 ? Math.round((totalSaved / totalDreamCost) * 100) : 0
+  const avgGoalProgress = goals.length > 0
+    ? Math.round(goals.reduce((sum, g) => sum + (g.targetPrice > 0 ? (g.amountSaved / g.targetPrice) * 100 : 0), 0) / goals.length)
+    : 0
+  const overallCompletion = avgGoalProgress
   const currentNetWorth = calculateNetWorthValue(data.netWorth)
 
   const nonPurchased = goals.filter(g => !g.purchased)
