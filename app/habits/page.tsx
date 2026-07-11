@@ -1,28 +1,42 @@
 "use client"
 
+import { useState, useMemo } from "react"
 import { useApp } from "@/store/AppContext"
 import Sidebar from "@/components/layout/Sidebar"
 import { motion } from "framer-motion"
 import { getToday } from "@/lib/utils"
-import { Flame } from "lucide-react"
+import { Flame, ChevronLeft, ChevronRight } from "lucide-react"
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
 export default function HabitsPage() {
   const { state, dispatch } = useApp()
   const { habits } = state.data
+  const [weekOffset, setWeekOffset] = useState(0)
 
   const today = getToday()
-  const weekDays = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date()
-    d.setDate(d.getDate() - d.getDay() + i)
-    return d.toISOString().split("T")[0]
-  })
 
-  const toggleHabit = (habitId: string, completed: boolean) => {
+  const weekStart = useMemo(() => {
+    const d = new Date()
+    d.setDate(d.getDate() - d.getDay() + weekOffset * 7)
+    return d
+  }, [weekOffset])
+
+  const weekDays = useMemo(() =>
+    Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(weekStart)
+      d.setDate(weekStart.getDate() + i)
+      return d.toISOString().split("T")[0]
+    }),
+    [weekStart]
+  )
+
+  const canGoForward = weekOffset < 0
+
+  const toggleHabit = (habitId: string, completed: boolean, date: string) => {
     dispatch({
       type: "ADD_HABIT_LOG",
-      payload: { habitId, date: today, completed }
+      payload: { habitId, date, completed }
     })
   }
 
@@ -37,8 +51,32 @@ export default function HabitsPage() {
       <main className="lg:pl-64">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <h1 className="text-2xl font-bold text-white mb-2">Habit Tracker</h1>
-            <p className="text-white/40 text-sm mb-8">Track daily habits and maintain streaks</p>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h1 className="text-2xl font-bold text-white">Habit Tracker</h1>
+                <p className="text-white/40 text-sm mt-1">Track daily habits and maintain streaks</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setWeekOffset(o => o - 1)}
+                  className="p-2 rounded-lg hover:bg-white/5 text-white/40 hover:text-white/70 transition-colors"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <span className="text-sm text-white/60 min-w-[100px] text-center">
+                  {weekOffset === 0 ? "This Week" : weekOffset === -1 ? "Last Week" : `${Math.abs(weekOffset)} weeks ago`}
+                </span>
+                <button
+                  onClick={() => setWeekOffset(o => Math.min(o + 1, 0))}
+                  disabled={!canGoForward}
+                  className={`p-2 rounded-lg transition-colors ${
+                    canGoForward ? 'hover:bg-white/5 text-white/40 hover:text-white/70' : 'text-white/10 cursor-not-allowed'
+                  }`}
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </div>
+            </div>
 
             <div className="overflow-x-auto">
               <div className="min-w-[600px]">
@@ -48,7 +86,7 @@ export default function HabitsPage() {
                   {weekDays.map((day, i) => {
                     const d = new Date(day)
                     return (
-                      <div key={day} className={`text-center text-xs font-medium ${day === today ? 'text-purple-400' : 'text-white/40'}`}>
+                      <div key={day} className={`text-center text-xs font-medium ${day === today && weekOffset === 0 ? 'text-purple-400' : 'text-white/40'}`}>
                         <div>{DAYS[d.getDay()]}</div>
                         <div>{d.getDate()}</div>
                       </div>
@@ -72,13 +110,13 @@ export default function HabitsPage() {
                         <span className="text-sm text-white/80 font-medium">{habit.name}</span>
                       </div>
 
-                      {weekDays.map(day => {
-                        const completed = getHabitStatus(habit.id, day)
-                        const isToday = day === today
-                        return (
-                          <button
-                            key={day}
-                            onClick={() => toggleHabit(habit.id, !completed)}
+                        {weekDays.map(day => {
+                          const completed = getHabitStatus(habit.id, day)
+                          const isToday = day === today
+                          return (
+                            <button
+                              key={day}
+                              onClick={() => toggleHabit(habit.id, !completed, day)}
                             className={`w-8 h-8 mx-auto rounded-full transition-all ${
                               completed
                                 ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"

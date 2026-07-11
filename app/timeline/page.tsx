@@ -80,7 +80,7 @@ export default function TimelinePage() {
                         </div>
 
                         <div className="flex items-center gap-4 text-xs text-white/40 mt-2">
-                          <span>{symbol}{formatCompactCurrency(goal.amountSaved)} / {symbol}{formatCompactCurrency(goal.targetPrice)}</span>
+                          <span>{formatCompactCurrency(goal.amountSaved, symbol)} / {formatCompactCurrency(goal.targetPrice, symbol)}</span>
                           <span className="font-medium text-white/60">{progress}%</span>
                         </div>
 

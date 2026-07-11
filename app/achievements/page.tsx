@@ -5,7 +5,7 @@ import { useApp } from "@/store/AppContext"
 import Sidebar from "@/components/layout/Sidebar"
 import { motion } from "framer-motion"
 import { getCurrencySymbol } from "@/lib/utils"
-import { Trophy, Award, Zap, Star } from "lucide-react"
+import { Trophy, Zap, Lock } from "lucide-react"
 
 const ACHIEVEMENT_DEFS = [
   { id: "first-lakh", name: "First ₹1 Lakh", desc: "Save ₹100,000 total", icon: "💰", xp: 100, check: (s: number) => s >= 100000 },
@@ -16,6 +16,15 @@ const ACHIEVEMENT_DEFS = [
   { id: "dream-house", name: "Bought a House", desc: "Purchase real estate", icon: "🏠", xp: 5000, check: (s: number, names: string[]) => names.some(n => n.includes("House")) },
   { id: "completion-50", name: "50% Complete", desc: "Complete 50% of your goals", icon: "⭐", xp: 1000, check: (s: number, names: string[], purchased: number, total: number) => total > 0 && (purchased / total) >= 0.5 },
   { id: "completion-100", name: "100% Complete", desc: "Complete all your goals", icon: "🌟", xp: 10000, check: (s: number, names: string[], purchased: number, total: number) => total > 0 && purchased === total },
+]
+
+const TITLE_MILESTONES = [
+  { level: 1, title: "Dreamer" },
+  { level: 5, title: "Builder" },
+  { level: 10, title: "Entrepreneur" },
+  { level: 20, title: "Founder" },
+  { level: 50, title: "Visionary" },
+  { level: 100, title: "Legend" },
 ]
 
 export default function AchievementsPage() {
@@ -42,14 +51,13 @@ export default function AchievementsPage() {
   const levelXP = totalXP % 500
   const maxLevelXP = 500
 
-  const getTitle = (level: number) => {
-    if (level >= 100) return "Legend"
-    if (level >= 50) return "Visionary"
-    if (level >= 20) return "Founder"
-    if (level >= 10) return "Entrepreneur"
-    if (level >= 5) return "Builder"
-    return "Dreamer"
-  }
+  const currentTitle = (() => {
+    let title = "Dreamer"
+    for (const m of TITLE_MILESTONES) {
+      if (level >= m.level) title = m.title
+    }
+    return title
+  })()
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
@@ -68,21 +76,21 @@ export default function AchievementsPage() {
                   <span className="text-3xl font-bold text-white">{level}</span>
                 </div>
                 <div className="flex-1">
-                  <div className="text-lg font-bold text-white">{getTitle(level)}</div>
-                  <div className="text-xs text-white/40 mt-1">Level {level}</div>
+                  <div className="text-lg font-bold text-white">{currentTitle}</div>
+                  <div className="text-xs text-white/40 mt-1">Level {level} &middot; {totalXP} total XP</div>
                   <div className="mt-2">
                     <div className="flex items-center justify-between text-xs text-white/40 mb-1">
-                      <span>XP: {totalXP} / {totalPossibleXP}</span>
-                      <span>{Math.round((totalXP / totalPossibleXP) * 100)}%</span>
+                      <span>Next Level</span>
+                      <span>{levelXP} / {maxLevelXP} XP</span>
                     </div>
                     <div className="progress-bar h-1.5">
-                      <div className="progress-bar-fill gold" style={{ width: `${(totalXP / totalPossibleXP) * 100}%` }} />
+                      <div className="progress-bar-fill gold" style={{ width: `${(levelXP / maxLevelXP) * 100}%` }} />
                     </div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-sm text-white/40">Next Level</div>
-                  <div className="text-sm text-white/60">{levelXP} / {maxLevelXP} XP</div>
+                <div className="text-right hidden sm:block">
+                  <div className="text-xs text-white/30">Total XP</div>
+                  <div className="text-lg font-bold text-white">{totalXP} <span className="text-sm font-normal text-white/30">/ {totalPossibleXP}</span></div>
                 </div>
               </div>
             </div>
@@ -95,16 +103,24 @@ export default function AchievementsPage() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
-                  className={`card p-4 transition-all ${ach.unlocked ? 'border-amber-500/20' : 'opacity-50'}`}
+                  className={`card p-4 transition-all ${ach.unlocked ? 'border-amber-500/20' : ''}`}
                 >
                   <div className="flex items-start gap-3">
-                    <div className={`text-2xl ${ach.unlocked ? '' : 'grayscale'}`}>{ach.icon}</div>
+                    <div className={`text-2xl relative ${ach.unlocked ? '' : 'grayscale opacity-40'}`}>
+                      {ach.icon}
+                      {!ach.unlocked && (
+                        <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-white/10 flex items-center justify-center">
+                          <Lock size={8} className="text-white/40" />
+                        </div>
+                      )}
+                    </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-sm text-white">{ach.name}</h3>
+                        <h3 className={`font-semibold text-sm ${ach.unlocked ? 'text-white' : 'text-white/50'}`}>{ach.name}</h3>
                         {ach.unlocked && <Trophy size={14} className="text-amber-400 flex-shrink-0" />}
+                        {!ach.unlocked && <Lock size={12} className="text-white/20 flex-shrink-0" />}
                       </div>
-                      <p className="text-xs text-white/40 mt-0.5">{ach.desc}</p>
+                      <p className={`text-xs mt-0.5 ${ach.unlocked ? 'text-white/40' : 'text-white/20'}`}>{ach.desc}</p>
                       <div className="flex items-center gap-1 mt-1.5">
                         <Zap size={12} className="text-purple-400" />
                         <span className="text-xs text-purple-300">{ach.xp} XP</span>
@@ -119,25 +135,25 @@ export default function AchievementsPage() {
             <div className="card p-5 mt-6">
               <h2 className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-3">Title Progression</h2>
               <div className="flex flex-wrap gap-2">
-                {[
-                  { level: 1, title: "Dreamer" },
-                  { level: 5, title: "Builder" },
-                  { level: 10, title: "Entrepreneur" },
-                  { level: 20, title: "Founder" },
-                  { level: 50, title: "Visionary" },
-                  { level: 100, title: "Legend" },
-                ].map(t => (
-                  <div
-                    key={t.level}
-                    className={`px-3 py-1.5 rounded-full text-xs font-medium ${
-                      level >= t.level
-                        ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
-                        : "bg-white/5 text-white/30 border border-white/5"
-                    }`}
-                  >
-                    Lvl {t.level} - {t.title}
-                  </div>
-                ))}
+                {TITLE_MILESTONES.map(t => {
+                  const earned = level >= t.level
+                  const active = t.title === currentTitle
+                  return (
+                    <div
+                      key={t.level}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                        active
+                          ? "bg-purple-500/25 text-purple-300 border border-purple-500/40 ring-1 ring-purple-500/30"
+                          : earned
+                            ? "bg-white/5 text-white/50 border border-white/10"
+                            : "bg-white/[0.02] text-white/20 border border-white/5"
+                      }`}
+                    >
+                      Lvl {t.level} - {t.title}
+                      {active && " ★"}
+                    </div>
+                  )
+                })}
               </div>
             </div>
           </motion.div>

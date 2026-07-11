@@ -83,20 +83,7 @@ export default function BusinessPage() {
               </div>
             </div>
 
-            {/* Additional KPIs */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {[
-                { label: "Meetings", value: business.meetings, suffix: "" },
-                { label: "Cold Calls", value: business.coldCalls, suffix: "" },
-                { label: "Deals Closed", value: business.dealsClosed, suffix: "" },
-                { label: "Conversion", value: business.conversionRate, suffix: "%" },
-              ].map((item, i) => (
-                <div key={i} className="card p-3">
-                  <div className="text-[10px] text-white/40 uppercase tracking-wider mb-1">{item.label}</div>
-                  <div className="text-lg font-bold text-white">{item.value}{item.suffix}</div>
-                </div>
-              ))}
-            </div>
+
           </motion.div>
         </div>
       </main>

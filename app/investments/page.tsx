@@ -28,7 +28,7 @@ export default function InvestmentsPage() {
   const totalInvested = investments.reduce((s, i) => s + i.amount, 0)
   const totalReturns = investments.reduce((s, i) => s + i.amount * (i.returns / 100), 0)
 
-  const chartData = investments.map(i => ({ name: i.type, value: i.amount }))
+  const chartData = investments.map(i => ({ name: i.name, value: i.amount, type: i.type }))
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault()
@@ -122,7 +122,7 @@ export default function InvestmentsPage() {
                     </div>
                     <div className="flex items-center gap-4">
                       <div className="text-right">
-                        <div className="text-sm font-medium text-white">{symbol}{formatCompactCurrency(inv.amount)}</div>
+                        <div className="text-sm font-medium text-white">{formatCompactCurrency(inv.amount, symbol)}</div>
                         <div className={`text-xs ${inv.returns >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                           {inv.returns >= 0 ? '+' : ''}{inv.returns}%
                         </div>
@@ -138,18 +138,29 @@ export default function InvestmentsPage() {
                 ))}
               </div>
 
-              {/* Pie Chart */}
+              {/* Pie Chart with Legend */}
               <div className="card p-5">
                 <h2 className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-4">Allocation</h2>
                 {chartData.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <PieChart>
-                      <Pie data={chartData} cx="50%" cy="50%" outerRadius={100} paddingAngle={3} dataKey="value">
-                        {chartData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                      </Pie>
-                      <Tooltip contentStyle={{ background: "#13131f", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "10px", color: "#fff" }} />
-                    </PieChart>
-                  </ResponsiveContainer>
+                  <div className="flex flex-col items-center">
+                    <ResponsiveContainer width="100%" height={250}>
+                      <PieChart>
+                        <Pie data={chartData} cx="50%" cy="50%" outerRadius={90} paddingAngle={3} dataKey="value">
+                          {chartData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                        </Pie>
+                        <Tooltip contentStyle={{ background: "#13131f", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "10px", color: "#fff" }} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div className="flex flex-wrap justify-center gap-x-5 gap-y-1.5 mt-2">
+                      {chartData.map((item, i) => (
+                        <div key={i} className="flex items-center gap-1.5 text-xs">
+                          <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: COLORS[i % COLORS.length] }} />
+                          <span className="text-white/60">{item.name}</span>
+                          <span className="text-white/30">({item.type})</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 ) : (
                   <div className="text-center py-12 text-white/30 text-sm">No investments yet</div>
                 )}

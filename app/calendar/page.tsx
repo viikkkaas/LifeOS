@@ -21,14 +21,17 @@ export default function CalendarPage() {
   const firstDayOfWeek = new Date(currentYear, currentMonth, 1).getDay()
 
   const goalEvents = useMemo(() => {
-    const events: { date: string; goal: typeof goals[0] }[] = []
+    const events: { date: string; goal: typeof goals[0]; type: "purchased" | "target" }[] = []
     goals.forEach(g => {
       if (g.purchaseDate) {
-        events.push({ date: g.purchaseDate, goal: g })
+        events.push({ date: g.purchaseDate, goal: g, type: "purchased" })
+      }
+      if (!g.purchased && g.targetYear === currentYear && currentMonth === 11) {
+        events.push({ date: `${currentYear}-12-31`, goal: g, type: "target" })
       }
     })
     return events
-  }, [goals])
+  }, [goals, currentYear, currentMonth])
 
   const calendarDays = useMemo(() => {
     const days: { day: number; events: typeof goalEvents }[] = []
@@ -95,11 +98,11 @@ export default function CalendarPage() {
                 {calendarDays.map(({ day, events }) => (
                   <div
                     key={day}
-                    className={`aspect-square rounded-lg p-1.5 transition-colors ${
+                    className={`aspect-square rounded-lg p-1.5 transition-colors relative group ${
                       isToday(day)
                         ? "bg-purple-500/10 border border-purple-500/30"
                         : events.length > 0
-                          ? "bg-emerald-500/5 border border-emerald-500/10"
+                          ? "bg-white/[0.01] border border-white/[0.04]"
                           : "hover:bg-white/[0.02]"
                     }`}
                   >
@@ -107,14 +110,16 @@ export default function CalendarPage() {
                       {day}
                     </div>
                     {events.length > 0 && (
-                      <div className="mt-1 space-y-0.5">
-                        {events.slice(0, 2).map((e, i) => (
-                          <div key={i} className="text-[8px] px-1 py-0.5 rounded bg-emerald-500/20 text-emerald-300 truncate leading-tight">
-                            ✓ {e.goal.name}
-                          </div>
+                      <div className="flex gap-0.5 mt-1 justify-center">
+                        {events.slice(0, 3).map((e, i) => (
+                          <span
+                            key={i}
+                            className={`w-1.5 h-1.5 rounded-full ${e.type === 'purchased' ? 'bg-emerald-400' : 'bg-purple-400'}`}
+                            title={`${e.goal.name} (${e.type === 'purchased' ? 'Purchased' : 'Target'})`}
+                          />
                         ))}
-                        {events.length > 2 && (
-                          <div className="text-[8px] text-white/30">+{events.length - 2} more</div>
+                        {events.length > 3 && (
+                          <span className="text-[8px] text-white/30">+{events.length - 3}</span>
                         )}
                       </div>
                     )}
@@ -136,7 +141,7 @@ export default function CalendarPage() {
                         <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
                         <span className="text-sm text-white/80">{g.name}</span>
                       </div>
-                      <span className="text-xs text-white/40">{symbol}{formatCompactCurrency(g.targetPrice)}</span>
+                      <span className="text-xs text-white/40">{formatCompactCurrency(g.targetPrice, symbol)}</span>
                     </div>
                   ))}
                 </div>

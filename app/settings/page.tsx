@@ -77,15 +77,23 @@ export default function SettingsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs text-white/40 mb-1.5 block">Currency Type</label>
-                  <select
-                    className="select-premium w-full"
-                    value={settings.currency}
-                    onChange={e => dispatch({ type: "UPDATE_SETTINGS", payload: { currency: e.target.value as Currency } })}
-                  >
-                    {["INR", "USD", "AED", "GBP", "EUR"].map(c => (
-                      <option key={c} value={c}>{c} ({getCurrencySymbol(c)})</option>
-                    ))}
-                  </select>
+                  <div className="relative">
+                    <select
+                      className="input-premium w-full appearance-none cursor-pointer"
+                      value={settings.currency}
+                      onChange={e => dispatch({ type: "UPDATE_SETTINGS", payload: { currency: e.target.value as Currency } })}
+                      style={{ color: 'var(--text-primary)', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
+                    >
+                      {["INR", "USD"].map(c => (
+                        <option key={c} value={c}>{c} ({getCurrencySymbol(c)})</option>
+                      ))}
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                      <svg className="w-4 h-4 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
                 </div>
                 <div>
                   <label className="text-xs text-white/40 mb-1.5 block">Custom Symbol (optional)</label>
