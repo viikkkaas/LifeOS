@@ -79,6 +79,13 @@ export interface Stats {
   recentlyPurchased: Goal | null
   upcomingGoal: Goal | null
   lifeScore: number
+  lifeScoreComponents: {
+    netWorthGrowth: number
+    goalCompletionRate: number
+    savingsConsistency: number
+    habitStreaks: number
+    businessGrowth: number
+  }
 }
 
 export interface Habit {

@@ -102,6 +102,13 @@ function calculateStats(data: AppData): Stats {
     overallCompletionPercentage: overallCompletion,
     closestGoal: closest, recentlyPurchased, upcomingGoal,
     lifeScore,
+    lifeScoreComponents: {
+      netWorthGrowth,
+      goalCompletionRate,
+      savingsConsistency,
+      habitStreaks,
+      businessGrowth,
+    },
   }
 }
 

@@ -1,12 +1,12 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useRef, useEffect } from "react"
 import { useApp } from "@/store/AppContext"
 import GoalCard from "@/components/goals/GoalCard"
 import AddGoalModal from "@/components/modals/AddGoalModal"
 import { motion, AnimatePresence } from "framer-motion"
 import { getCurrencySymbol } from "@/lib/utils"
-import { Plus, Search } from "lucide-react"
+import { Plus, Search, ChevronLeft, ChevronRight } from "lucide-react"
 
 const categories: { label: string; icon: string }[] = [
   { label: "All", icon: "📋" },
@@ -30,6 +30,26 @@ export default function GoalsListView() {
   const [filterCategory, setFilterCategory] = useState("All")
   const [filterPurchased, setFilterPurchased] = useState<"all" | "purchased" | "not-purchased">("all")
   const [sortBy, setSortBy] = useState<"newest" | "oldest" | "price-high" | "price-low" | "progress">("newest")
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(true)
+
+  useEffect(() => {
+    requestAnimationFrame(() => checkScroll())
+  }, [])
+
+  const scrollFilters = (dir: "left" | "right") => {
+    if (!scrollRef.current) return
+    const amount = 200
+    scrollRef.current.scrollBy({ left: dir === "left" ? -amount : amount, behavior: "smooth" })
+  }
+
+  const checkScroll = () => {
+    if (!scrollRef.current) return
+    const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current
+    setCanScrollLeft(scrollLeft > 4)
+    setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 4)
+  }
 
   const filteredGoals = useMemo(() => {
     let result = [...goals]
@@ -94,20 +114,43 @@ export default function GoalsListView() {
         </select>
       </div>
 
-      <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-none">
-        {categories.map(cat => (
+      <div className="relative mb-6 group">
+        {canScrollLeft && (
           <button
-            key={cat.label}
-            onClick={() => setFilterCategory(cat.label)}
-            className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
-              filterCategory === cat.label
-                ? "bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-white border border-purple-500/30"
-                : "bg-white/[0.03] text-white/50 hover:text-white/70 border border-transparent"
-            }`}
+            onClick={() => scrollFilters("left")}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-[#0a0a0f]/80 backdrop-blur-sm border border-white/[0.06] flex items-center justify-center text-white/50 hover:text-white/80 transition-colors opacity-60 lg:opacity-0 lg:group-hover:opacity-100"
           >
-            {cat.icon} {cat.label}
+            <ChevronLeft size="16" />
           </button>
-        ))}
+        )}
+        <div
+          ref={scrollRef}
+          onScroll={checkScroll}
+          className="flex gap-2 overflow-x-auto pb-2 scrollbar-none"
+          style={{ maskImage: canScrollRight ? 'linear-gradient(to right, black calc(100% - 32px), transparent 100%)' : 'none', WebkitMaskImage: canScrollRight ? 'linear-gradient(to right, black calc(100% - 32px), transparent 100%)' : 'none' }}
+        >
+          {categories.map(cat => (
+            <button
+              key={cat.label}
+              onClick={() => setFilterCategory(cat.label)}
+              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all shrink-0 ${
+                filterCategory === cat.label
+                  ? "bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-white border border-purple-500/30"
+                  : "bg-white/[0.03] text-white/50 hover:text-white/70 border border-transparent"
+              }`}
+            >
+              {cat.icon} {cat.label}
+            </button>
+          ))}
+        </div>
+        {canScrollRight && (
+          <button
+            onClick={() => scrollFilters("right")}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-[#0a0a0f]/80 backdrop-blur-sm border border-white/[0.06] flex items-center justify-center text-white/50 hover:text-white/80 transition-colors opacity-60 lg:opacity-0 lg:group-hover:opacity-100"
+          >
+            <ChevronRight size="16" />
+          </button>
+        )}
       </div>
 
       {filteredGoals.length === 0 ? (

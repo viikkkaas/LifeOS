@@ -25,7 +25,7 @@ export default function RecentGoals({ goals, symbol }: RecentGoalsProps) {
           View all
         </Link>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[320px] overflow-y-auto">
         {recent.map((goal, i) => {
           const progress = calculateProgress(goal.amountSaved, goal.targetPrice)
           return (

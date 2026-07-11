@@ -113,7 +113,7 @@ export default function DreamWallView() {
               {activeGoal.why && (
                 <div className="pt-2 border-t border-white/[0.04]">
                   <div className="text-xs text-white/30 mb-1">Why this matters</div>
-                  <p className="text-white/60 italic">&ldquo;{activeGoal.why}&rdquo;</p>
+                  <p className="text-white/60">{activeGoal.why}</p>
                 </div>
               )}
             </div>

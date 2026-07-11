@@ -52,12 +52,15 @@ export default function GoalCard({ goal, symbol, dispatch, locked }: GoalCardPro
   const goalDate = monthsNeeded ? new Date() : null
   if (goalDate && monthsNeeded) goalDate.setMonth(goalDate.getMonth() + monthsNeeded)
 
+  const unrealistic = monthsNeeded !== null && monthsNeeded > 120
+
   return (
     <>
-      <div className={`card p-5 relative overflow-hidden group transition-all duration-300 ${goal.purchased ? 'opacity-70' : ''}`}>
+      <div className={`card p-5 relative overflow-hidden group transition-all duration-300 ${goal.purchased ? 'opacity-70' : ''} ${unrealistic ? 'border-amber-500/20' : ''}`}>
         {/* Top gradient line */}
         <div className={`absolute top-0 left-0 right-0 h-0.5 ${
           goal.purchased ? 'bg-emerald-500/50' :
+          unrealistic ? 'bg-amber-500/50' :
           progress >= 100 ? 'bg-green-500/50' :
           progress >= 50 ? 'bg-purple-500/50' :
           'bg-white/5'
@@ -67,6 +70,11 @@ export default function GoalCard({ goal, symbol, dispatch, locked }: GoalCardPro
         {goal.locked && (
           <div className="absolute top-3 right-3 text-white/20">
             <Lock size={14} />
+          </div>
+        )}
+        {unrealistic && !goal.purchased && (
+          <div className="absolute top-3 left-3 flex items-center gap-1" title="Timeline may be unrealistic">
+            <span className="text-amber-400 text-xs">⚠</span>
           </div>
         )}
 
@@ -90,7 +98,7 @@ export default function GoalCard({ goal, symbol, dispatch, locked }: GoalCardPro
 
           {/* Why */}
           {goal.why && (
-            <p className="text-xs text-white/30 italic mb-3 line-clamp-2">&ldquo;{goal.why}&rdquo;</p>
+            <p className="text-xs text-white/30 mb-3 line-clamp-2"><span className="text-white/20 font-medium">Why: </span>{goal.why}</p>
           )}
 
           {/* Progress Bar */}
@@ -145,20 +153,24 @@ export default function GoalCard({ goal, symbol, dispatch, locked }: GoalCardPro
 
           {/* Action Buttons */}
           <div className="flex items-center gap-1.5 pt-2 border-t border-white/[0.04]">
-            <button
-              onClick={() => { if (locked) { toast.error("Unlock settings to edit"); return }; setShowEdit(true) }}
-              className="p-1.5 rounded hover:bg-white/5 text-white/30 hover:text-white/70 transition-colors"
-              title="Edit"
-            >
-              <Edit3 size="14" />
-            </button>
-            <button
-              onClick={handleDuplicate}
-              className="p-1.5 rounded hover:bg-white/5 text-white/30 hover:text-white/70 transition-colors"
-              title="Duplicate"
-            >
-              <Copy size="14" />
-            </button>
+            {!goal.purchased && (
+              <button
+                onClick={() => { if (locked) { toast.error("Unlock settings to edit"); return }; setShowEdit(true) }}
+                className="p-1.5 rounded hover:bg-white/5 text-white/30 hover:text-white/70 transition-colors"
+                title="Edit"
+              >
+                <Edit3 size="14" />
+              </button>
+            )}
+            {!goal.purchased && (
+              <button
+                onClick={handleDuplicate}
+                className="p-1.5 rounded hover:bg-white/5 text-white/30 hover:text-white/70 transition-colors"
+                title="Duplicate"
+              >
+                <Copy size="14" />
+              </button>
+            )}
             <button
               onClick={handleDelete}
               className="p-1.5 rounded hover:bg-red-500/10 text-white/30 hover:text-red-400 transition-colors"
@@ -175,20 +187,24 @@ export default function GoalCard({ goal, symbol, dispatch, locked }: GoalCardPro
                 <CheckCircle size="14" />
               </button>
             )}
-            <button
-              onClick={() => setShowDeposit(true)}
-              className="ml-auto p-1.5 rounded hover:bg-white/5 text-white/30 hover:text-white/70 transition-colors"
-              title="Add Deposit"
-            >
-              <Plus size="14" />
-            </button>
-            <button
-              onClick={handleToggleLock}
-              className={`p-1.5 rounded hover:bg-white/5 transition-colors ${goal.locked ? 'text-amber-400' : 'text-white/30 hover:text-white/70'}`}
-              title={goal.locked ? "Unlock" : "Lock"}
-            >
-              {goal.locked ? <Lock size="14" /> : <Unlock size="14" />}
-            </button>
+            {!goal.purchased && (
+              <button
+                onClick={() => setShowDeposit(true)}
+                className="ml-auto p-1.5 rounded hover:bg-white/5 text-white/30 hover:text-white/70 transition-colors"
+                title="Add Deposit"
+              >
+                <Plus size="14" />
+              </button>
+            )}
+            {!goal.purchased && (
+              <button
+                onClick={handleToggleLock}
+                className={`p-1.5 rounded hover:bg-white/5 transition-colors ${goal.locked ? 'text-amber-400' : 'text-white/30 hover:text-white/70'}`}
+                title={goal.locked ? "Unlock" : "Lock"}
+              >
+                {goal.locked ? <Lock size="14" /> : <Unlock size="14" />}
+              </button>
+            )}
           </div>
         </div>
       </div>
