@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useRef } from "react"
 import { useApp } from "@/store/AppContext"
 import Sidebar from "@/components/layout/Sidebar"
 import { motion } from "framer-motion"
@@ -11,8 +12,28 @@ const COLORS = ["#667eea", "#764ba2", "#f093fb", "#f5576c", "#4facfe", "#43e97b"
 
 export default function NetWorthPage() {
   const { state, dispatch } = useApp()
-  const { netWorth, settings } = state.data
+  const { netWorth, settings, investments, business } = state.data
   const symbol = getCurrencySymbol(settings.currency, settings.customCurrencySymbol)
+  const autoFilled = useRef(false)
+
+  const investmentsTotalValue = investments.reduce((s, i) => s + i.amount + i.amount * (i.returns / 100), 0)
+  const businessInvestmentsValue = investments.filter(i => i.type === "Business").reduce((s, i) => s + i.amount + i.amount * (i.returns / 100), 0)
+  const computedBusinessValue = Math.max(businessInvestmentsValue, business.revenue)
+
+  useEffect(() => {
+    if (autoFilled.current) return
+    const updates: Record<string, number> = {}
+    if (netWorth.investments === 0 && investmentsTotalValue > 0) {
+      updates.investments = investmentsTotalValue
+    }
+    if (netWorth.businessValue === 0 && computedBusinessValue > 0) {
+      updates.businessValue = computedBusinessValue
+    }
+    if (Object.keys(updates).length > 0) {
+      autoFilled.current = true
+      dispatch({ type: "UPDATE_NET_WORTH", payload: updates })
+    }
+  }, [])
 
   const assets = [
     { label: "Cash", key: "cash", value: netWorth.cash },
@@ -37,6 +58,7 @@ export default function NetWorthPage() {
   const totalNetWorth = totalAssets - totalLiabilities
 
   const updateAsset = (key: string, value: string) => {
+    autoFilled.current = true
     dispatch({ type: "UPDATE_NET_WORTH", payload: { [key]: Number(value) || 0 } })
   }
 

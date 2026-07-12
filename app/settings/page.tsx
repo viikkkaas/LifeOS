@@ -84,7 +84,7 @@ export default function SettingsPage() {
                       onChange={e => dispatch({ type: "UPDATE_SETTINGS", payload: { currency: e.target.value as Currency } })}
                       style={{ color: 'var(--text-primary)', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
                     >
-                      {["INR", "USD"].map(c => (
+                      {["INR", "USD", "AED", "GBP", "EUR"].map(c => (
                         <option key={c} value={c}>{c} ({getCurrencySymbol(c)})</option>
                       ))}
                     </select>

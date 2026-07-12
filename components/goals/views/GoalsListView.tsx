@@ -35,7 +35,10 @@ export default function GoalsListView() {
   const [canScrollRight, setCanScrollRight] = useState(true)
 
   useEffect(() => {
-    requestAnimationFrame(() => checkScroll())
+    const check = () => requestAnimationFrame(() => checkScroll())
+    check()
+    window.addEventListener("resize", check)
+    return () => window.removeEventListener("resize", check)
   }, [])
 
   const scrollFilters = (dir: "left" | "right") => {
@@ -127,7 +130,10 @@ export default function GoalsListView() {
           ref={scrollRef}
           onScroll={checkScroll}
           className="flex gap-2 overflow-x-auto pb-2 scrollbar-none"
-          style={{ maskImage: canScrollRight ? 'linear-gradient(to right, black calc(100% - 32px), transparent 100%)' : 'none', WebkitMaskImage: canScrollRight ? 'linear-gradient(to right, black calc(100% - 32px), transparent 100%)' : 'none' }}
+          style={{
+            maskImage: canScrollRight ? 'linear-gradient(to right, black calc(100% - 48px), transparent 100%)' : 'none',
+            WebkitMaskImage: canScrollRight ? 'linear-gradient(to right, black calc(100% - 48px), transparent 100%)' : 'none',
+          }}
         >
           {categories.map(cat => (
             <button

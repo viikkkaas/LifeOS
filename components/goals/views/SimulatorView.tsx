@@ -25,12 +25,19 @@ export default function SimulatorView() {
   estimatedDate.setMonth(estimatedDate.getMonth() + months)
 
   const goalBreakdown = useMemo(() => {
-    return goals.filter(g => !g.purchased).map(g => {
+    const active = goals.filter(g => !g.purchased)
+    const totalRemaining = active.reduce((s, g) => s + (g.targetPrice - g.amountSaved), 0)
+    return active.map(g => {
       const remaining = g.targetPrice - g.amountSaved
-      const m = totalMonthly > 0 ? Math.ceil(remaining / totalMonthly) : 9999
+      const monthlyContribution = g.recurringSaving > 0
+        ? g.recurringSaving
+        : totalMonthly > 0 && totalRemaining > 0
+          ? totalMonthly * (remaining / totalRemaining)
+          : 0
+      const m = monthlyContribution > 0 ? Math.ceil(remaining / monthlyContribution) : 9999
       const date = new Date()
       date.setMonth(date.getMonth() + m)
-      return { ...g, remaining, monthsNeeded: m, estimatedDate: date }
+      return { ...g, remaining, monthlyContribution, monthsNeeded: m, estimatedDate: date }
     }).sort((a, b) => a.monthsNeeded - b.monthsNeeded)
   }, [goals, totalMonthly])
 

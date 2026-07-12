@@ -80,7 +80,7 @@ export default function AchievementsPage() {
                   <div className="text-xs text-white/40 mt-1">Level {level} &middot; {totalXP} total XP</div>
                   <div className="mt-2">
                     <div className="flex items-center justify-between text-xs text-white/40 mb-1">
-                      <span>Next Level</span>
+                      <span>Level {level + 1}</span>
                       <span>{levelXP} / {maxLevelXP} XP</span>
                     </div>
                     <div className="progress-bar h-1.5">
@@ -118,7 +118,6 @@ export default function AchievementsPage() {
                       <div className="flex items-center gap-2">
                         <h3 className={`font-semibold text-sm ${ach.unlocked ? 'text-white' : 'text-white/50'}`}>{ach.name}</h3>
                         {ach.unlocked && <Trophy size={14} className="text-amber-400 flex-shrink-0" />}
-                        {!ach.unlocked && <Lock size={12} className="text-white/20 flex-shrink-0" />}
                       </div>
                       <p className={`text-xs mt-0.5 ${ach.unlocked ? 'text-white/40' : 'text-white/20'}`}>{ach.desc}</p>
                       <div className="flex items-center gap-1 mt-1.5">
@@ -135,14 +134,15 @@ export default function AchievementsPage() {
             <div className="card p-5 mt-6">
               <h2 className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-3">Title Progression</h2>
               <div className="flex flex-wrap gap-2">
-                {TITLE_MILESTONES.map(t => {
+                {TITLE_MILESTONES.map((t, i) => {
                   const earned = level >= t.level
-                  const active = t.title === currentTitle
+                  const nextMilestone = !earned && (i === 0 || level >= TITLE_MILESTONES[i - 1].level)
+                  const locked = !earned && !nextMilestone
                   return (
                     <div
                       key={t.level}
                       className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                        active
+                        nextMilestone
                           ? "bg-purple-500/25 text-purple-300 border border-purple-500/40 ring-1 ring-purple-500/30"
                           : earned
                             ? "bg-white/5 text-white/50 border border-white/10"
@@ -150,7 +150,7 @@ export default function AchievementsPage() {
                       }`}
                     >
                       Lvl {t.level} - {t.title}
-                      {active && " ★"}
+                      {nextMilestone && " ★"}
                     </div>
                   )
                 })}
