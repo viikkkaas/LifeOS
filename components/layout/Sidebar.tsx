@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import {
   LayoutDashboard, Target, BarChart3, Settings, Calendar, Clock,
   BookOpen, CheckSquare, Trophy, TrendingUp, Wallet,
-  Menu, X, ChevronDown, Briefcase,
+  Menu, X, ChevronDown, Briefcase, Phone,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -46,6 +46,7 @@ const groups: NavGroup[] = [
     label: "Life",
     icon: CheckSquare,
     items: [
+      { href: "/daily-goals", label: "Daily Goals", icon: Phone },
       { href: "/habits", label: "Habits", icon: CheckSquare },
       { href: "/journal", label: "Journal", icon: BookOpen },
       { href: "/timeline", label: "Timeline", icon: Clock },

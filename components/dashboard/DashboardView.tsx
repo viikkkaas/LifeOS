@@ -270,6 +270,49 @@ export default function DashboardView() {
         </div>
       </motion.div>
 
+      {/* Today's Cold Calls */}
+      {(() => {
+        const todayEntry = data.dailyGoals?.find(dg => dg.date === getToday())
+        if (!todayEntry || (todayEntry.coldCalls === 0 && todayEntry.shows === 0)) return null
+        return (
+          <motion.div variants={item}>
+            <div className="card p-6">
+              <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-4">Today's Cold Calls</h2>
+              <div className="grid grid-cols-5 gap-3">
+                <div className="text-center">
+                  <div className="text-sm text-white/40">📞</div>
+                  <div className="text-lg font-bold text-white">{todayEntry.coldCalls}</div>
+                  <div className="text-[10px] text-white/30">Calls</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-sm text-white/40">💬</div>
+                  <div className="text-lg font-bold text-white">{todayEntry.conversations}</div>
+                  <div className="text-[10px] text-white/30">Conv.</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-sm text-white/40">🖥️</div>
+                  <div className="text-lg font-bold text-white">{todayEntry.demos}</div>
+                  <div className="text-[10px] text-white/30">Demos</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-sm text-white/40">🚪</div>
+                  <div className="text-lg font-bold text-white">{todayEntry.gatekeepersPassed}</div>
+                  <div className="text-[10px] text-white/30">Gates</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-sm text-white/40">🎥</div>
+                  <div className="text-lg font-bold text-white">{todayEntry.shows}</div>
+                  <div className="text-[10px] text-white/30">Shows</div>
+                </div>
+              </div>
+              <Link href="/daily-goals" className="block text-center text-xs text-purple-400/60 hover:text-purple-400 mt-3 transition-colors">
+                View details →
+              </Link>
+            </div>
+          </motion.div>
+        )
+      })()}
+
       <motion.div variants={item}>
         <RecentGoals goals={data.goals} symbol={symbol} />
       </motion.div>

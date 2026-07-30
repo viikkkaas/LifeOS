@@ -4,7 +4,7 @@ import React, { createContext, useContext, useReducer, useEffect, useCallback } 
 import type {
   AppData, Goal, Habit, JournalEntry,
   BusinessMetrics, Investment, NetWorth, Settings,
-  Achievement, Deposit, Stats
+  Achievement, Deposit, Stats, DailyGoal
 } from "@/types"
 import { DEFAULT_APP_DATA } from "@/lib/defaults"
 import { calculateProgress, generateId, getToday, getCurrencySymbol } from "@/lib/utils"
@@ -38,6 +38,9 @@ type Action =
   | { type: "UPDATE_SETTINGS"; payload: Partial<Settings> }
   | { type: "UNLOCK_ACHIEVEMENT"; payload: Achievement }
   | { type: "SET_LOCKED"; payload: boolean }
+  | { type: "ADD_DAILY_GOAL"; payload: DailyGoal }
+  | { type: "UPDATE_DAILY_GOAL"; payload: DailyGoal }
+  | { type: "DELETE_DAILY_GOAL"; payload: string }
   | { type: "RECALCULATE" }
 
 function calculateStats(data: AppData): Stats {
@@ -296,6 +299,24 @@ function appReducer(state: AppState, action: Action): AppState {
 
     case "SET_LOCKED": {
       newData = { ...state.data, settings: { ...state.data.settings, locked: action.payload } }
+      return { data: newData, stats: calculateStats(newData), initialized: true }
+    }
+
+    case "ADD_DAILY_GOAL": {
+      newData = { ...state.data, dailyGoals: [...state.data.dailyGoals, action.payload] }
+      return { data: newData, stats: calculateStats(newData), initialized: true }
+    }
+
+    case "UPDATE_DAILY_GOAL": {
+      newData = {
+        ...state.data,
+        dailyGoals: state.data.dailyGoals.map(dg => dg.id === action.payload.id ? action.payload : dg)
+      }
+      return { data: newData, stats: calculateStats(newData), initialized: true }
+    }
+
+    case "DELETE_DAILY_GOAL": {
+      newData = { ...state.data, dailyGoals: state.data.dailyGoals.filter(dg => dg.id !== action.payload) }
       return { data: newData, stats: calculateStats(newData), initialized: true }
     }
 

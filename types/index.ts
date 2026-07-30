@@ -157,6 +157,18 @@ export interface NetWorth {
   mortgage: number
 }
 
+export interface DailyGoal {
+  id: string
+  date: string
+  coldCalls: number
+  conversations: number
+  demos: number
+  gatekeepersPassed: number
+  shows: number
+  notes: string
+  createdAt: string
+}
+
 export interface Settings {
   currency: Currency
   customCurrencySymbol: string
@@ -169,6 +181,7 @@ export interface Settings {
 
 export interface AppData {
   goals: Goal[]
+  dailyGoals: DailyGoal[]
   habits: Habit[]
   journal: JournalEntry[]
   business: BusinessMetrics

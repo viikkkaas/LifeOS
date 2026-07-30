@@ -1,4 +1,4 @@
-import type { Goal, Habit, BusinessMetrics, Investment, NetWorth, Settings, AppData } from "@/types"
+import type { Goal, Habit, BusinessMetrics, Investment, NetWorth, Settings, AppData, DailyGoal } from "@/types"
 
 export const DEFAULT_GOALS: Goal[] = [
   { id: "g1", name: "iPhone Pro", category: "Apple Ecosystem", targetPrice: 150000, amountSaved: 45000, priority: "High", targetYear: 2025, purchased: false, purchaseDate: null, notes: "Latest iPhone Pro Max with 1TB storage", imageUrl: "", tags: ["Want"], why: "Need the best tools for content creation", images: [], recurringSaving: 5000, recurringFrequency: "Monthly", deposits: [], createdAt: "", updatedAt: "", order: 0, locked: false },
@@ -16,6 +16,8 @@ export const DEFAULT_GOALS: Goal[] = [
   { id: "g13", name: "Apple Watch for Friend 1", category: "Gifts", targetPrice: 25000, amountSaved: 25000, priority: "Medium", targetYear: 2024, purchased: true, purchaseDate: "2024-12-25", notes: "Birthday gift for best friend", imageUrl: "", tags: ["Gift"], why: "Show appreciation for friendship", images: [], recurringSaving: 0, recurringFrequency: "None", deposits: [], createdAt: "", updatedAt: "", order: 12, locked: false },
   { id: "g14", name: "Apple Watch for Friend 2", category: "Gifts", targetPrice: 25000, amountSaved: 10000, priority: "Low", targetYear: 2025, purchased: false, purchaseDate: null, notes: "Anniversary gift", imageUrl: "", tags: ["Gift"], why: "Make someone special feel valued", images: [], recurringSaving: 2000, recurringFrequency: "Monthly", deposits: [], createdAt: "", updatedAt: "", order: 13, locked: false },
 ]
+
+export const DEFAULT_DAILY_GOALS: DailyGoal[] = []
 
 export const DEFAULT_HABITS: Habit[] = [
   { id: "h1", name: "Gym", icon: "💪", streak: 0, lastCheckin: null, logs: [], createdAt: "" },
@@ -65,6 +67,7 @@ export const DEFAULT_SETTINGS: Settings = {
 
 export const DEFAULT_APP_DATA: AppData = {
   goals: DEFAULT_GOALS,
+  dailyGoals: DEFAULT_DAILY_GOALS,
   habits: DEFAULT_HABITS,
   journal: [],
   business: DEFAULT_BUSINESS,
