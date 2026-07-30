@@ -127,8 +127,11 @@ function appReducer(state: AppState, action: Action): AppState {
   let newData: AppData
 
   switch (action.type) {
-    case "INIT":
-      return { data: action.payload, stats: calculateStats(action.payload), initialized: true }
+    case "INIT": {
+      // Merge stored data with defaults so new fields missing from old localStorage don't crash
+      const merged: AppData = { ...DEFAULT_APP_DATA, ...action.payload }
+      return { data: merged, stats: calculateStats(merged), initialized: true }
+    }
 
     case "ADD_GOAL": {
       newData = { ...state.data, goals: [...state.data.goals, action.payload] }

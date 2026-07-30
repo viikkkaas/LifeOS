@@ -18,7 +18,7 @@ const METRICS = [
 
 export default function DailyGoalsPage() {
   const { state, dispatch } = useApp()
-  const { dailyGoals } = state.data
+  const { dailyGoals = [] } = state.data
   const today = getToday()
 
   // Find today's entry or start fresh
