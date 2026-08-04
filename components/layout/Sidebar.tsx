@@ -7,7 +7,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import {
   LayoutDashboard, Target, BarChart3, Settings, Calendar, Clock,
   BookOpen, CheckSquare, Trophy, TrendingUp, Wallet,
-  Menu, X, ChevronDown, Briefcase, Phone,
+  Menu, X, ChevronDown, Briefcase, Phone, Users, CalendarCheck,
+  CalendarDays, ScrollText,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -25,6 +26,17 @@ interface NavGroup {
 }
 
 const groups: NavGroup[] = [
+  {
+    label: "Sales",
+    icon: Phone,
+    items: [
+      { href: "/sales/daily", label: "Daily Log", icon: Phone },
+      { href: "/sales/weekly", label: "Weekly Review", icon: CalendarCheck },
+      { href: "/sales/clients", label: "Clients", icon: Users },
+      { href: "/sales/monthly", label: "Monthly Checkpoints", icon: CalendarDays },
+      { href: "/sales/playbook", label: "Playbook", icon: ScrollText },
+    ],
+  },
   {
     label: "Money",
     icon: Wallet,
@@ -46,7 +58,6 @@ const groups: NavGroup[] = [
     label: "Life",
     icon: CheckSquare,
     items: [
-      { href: "/daily-goals", label: "Daily Goals", icon: Phone },
       { href: "/habits", label: "Habits", icon: CheckSquare },
       { href: "/journal", label: "Journal", icon: BookOpen },
       { href: "/timeline", label: "Timeline", icon: Clock },
@@ -65,6 +76,7 @@ export default function Sidebar() {
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
+    Sales: true,
     Money: true,
     Goals: true,
     Life: true,

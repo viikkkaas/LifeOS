@@ -46,7 +46,38 @@ export default function DashboardView() {
     return (data.dailyGoals ?? []).find(dg => dg.date === getToday())
   }, [data.dailyGoals])
 
-  const hasCallsToday = todayEntry && (todayEntry.coldCalls > 0 || todayEntry.shows > 0)
+  const weekSales = useMemo(() => {
+    const now = new Date()
+    const start = new Date(now)
+    start.setDate(now.getDate() - now.getDay())
+    const entries = (data.dailyGoals ?? []).filter(dg => {
+      const d = new Date(dg.date)
+      return d >= start && d <= now
+    })
+    const sum = (f: (e: any) => number) => entries.reduce((s, e) => s + f(e), 0)
+    return {
+      calls: sum(e => e.coldCalls),
+      demos: sum(e => e.demos),
+      shows: sum(e => e.shows),
+      closes: sum(e => e.closes || 0),
+    }
+  }, [data.dailyGoals])
+
+  const nextTarget = useMemo(() => {
+    const targets = [
+      { label: "Aug '26", through: "2026-08", count: 1 },
+      { label: "Oct '26", through: "2026-10", count: 3 },
+      { label: "Dec '26", through: "2026-12", count: 5 },
+    ]
+    const signed = (through: string) =>
+      (data.clients ?? []).filter(c => c.closeDate && c.closeDate.slice(0, 7) <= through).length
+    const next = targets.find(t => signed(t.through) < t.count) ?? targets[targets.length - 1]
+    return { label: next.label, count: next.count, signed: signed(next.through) }
+  }, [data.clients])
+
+  const totalClientMrr = useMemo(() => {
+    return (data.clients ?? []).reduce((s, c) => s + (c.mrr || 0), 0)
+  }, [data.clients])
 
   const topGoal = useMemo(() => {
     const active = data.goals.filter(g => !g.purchased)
@@ -276,44 +307,58 @@ export default function DashboardView() {
         </div>
       </motion.div>
 
-      {/* Today's Cold Calls */}
-      {hasCallsToday && (
-        <motion.div variants={item}>
-          <div className="card p-6">
-            <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-4">Today's Cold Calls</h2>
-            <div className="grid grid-cols-5 gap-3">
-              <div className="text-center">
-                <div className="text-sm text-white/40">📞</div>
-                <div className="text-lg font-bold text-white">{todayEntry!.coldCalls}</div>
-                <div className="text-[10px] text-white/30">Calls</div>
-              </div>
-              <div className="text-center">
-                <div className="text-sm text-white/40">💬</div>
-                <div className="text-lg font-bold text-white">{todayEntry!.conversations}</div>
-                <div className="text-[10px] text-white/30">Conv.</div>
-              </div>
-              <div className="text-center">
-                <div className="text-sm text-white/40">🖥️</div>
-                <div className="text-lg font-bold text-white">{todayEntry!.demos}</div>
-                <div className="text-[10px] text-white/30">Demos</div>
-              </div>
-              <div className="text-center">
-                <div className="text-sm text-white/40">🚪</div>
-                <div className="text-lg font-bold text-white">{todayEntry!.gatekeepersPassed}</div>
-                <div className="text-[10px] text-white/30">Gates</div>
-              </div>
-              <div className="text-center">
-                <div className="text-sm text-white/40">🎥</div>
-                <div className="text-lg font-bold text-white">{todayEntry!.shows}</div>
-                <div className="text-[10px] text-white/30">Shows</div>
-              </div>
-            </div>
-            <Link href="/daily-goals" className="block text-center text-xs text-purple-400/60 hover:text-purple-400 mt-3 transition-colors">
-              View details →
-            </Link>
+      {/* Sales Snapshot */}
+      <motion.div variants={item}>
+        <div className="card p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wider">Sales Snapshot</h2>
+            <Link href="/sales/daily" className="text-xs text-purple-400/60 hover:text-purple-400 transition-colors">Open Daily Log →</Link>
           </div>
-        </motion.div>
-      )}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            <div className="text-center">
+              <div className="text-sm text-white/40">📞</div>
+              <div className="text-lg font-bold text-white">{weekSales.calls}</div>
+              <div className="text-[10px] text-white/30">Calls this week</div>
+            </div>
+            <div className="text-center">
+              <div className="text-sm text-white/40">🖥️</div>
+              <div className="text-lg font-bold text-white">{weekSales.demos}</div>
+              <div className="text-[10px] text-white/30">Demos booked</div>
+            </div>
+            <div className="text-center">
+              <div className="text-sm text-white/40">🎥</div>
+              <div className="text-lg font-bold text-white">{weekSales.shows}</div>
+              <div className="text-[10px] text-white/30">Demos held</div>
+            </div>
+            <div className="text-center">
+              <div className="text-sm text-white/40">🏆</div>
+              <div className="text-lg font-bold text-white">{weekSales.closes}</div>
+              <div className="text-[10px] text-white/30">Closes</div>
+            </div>
+            <Link href="/sales/monthly" className="text-center hover:bg-white/[0.02] rounded-lg p-1 transition-colors">
+              <div className="text-sm text-white/40">🎯</div>
+              <div className="text-lg font-bold text-white">{nextTarget.signed}/{nextTarget.count}</div>
+              <div className="text-[10px] text-white/30">vs {nextTarget.label}</div>
+            </Link>
+            <div className="text-center">
+              <div className="text-sm text-white/40">💵</div>
+              <div className="text-lg font-bold text-white">{formatCompactCurrency(totalClientMrr, symbol)}</div>
+              <div className="text-[10px] text-white/30">Client MRR /mo</div>
+            </div>
+          </div>
+          {todayEntry && (
+            <div className="mt-3 pt-3 border-t border-white/[0.04] flex items-center justify-between text-xs">
+              <div className="text-white/40">
+                Today: {todayEntry.coldCalls} calls · {todayEntry.gatekeepersPassed} gates · {todayEntry.closes || 0} close{todayEntry.closes === 1 ? "" : "s"}
+                {todayEntry.scriptVersion && <span className="text-sky-400/70 ml-2">· {todayEntry.scriptVersion}</span>}
+              </div>
+              {Math.max(0, todayEntry.demos - todayEntry.shows) > 0 && (
+                <div className="text-rose-400/70">{Math.max(0, todayEntry.demos - todayEntry.shows)} no-show{Math.max(0, todayEntry.demos - todayEntry.shows) > 1 ? "s" : ""}</div>
+              )}
+            </div>
+          )}
+        </div>
+      </motion.div>
 
       <motion.div variants={item}>
         <RecentGoals goals={data.goals} symbol={symbol} />

@@ -157,6 +157,23 @@ export interface NetWorth {
   mortgage: number
 }
 
+export interface ObjectionTally {
+  price: number
+  timing: number
+  trust: number
+  alreadyHas: number
+  other: number
+}
+
+export interface NoCloseReasonTally {
+  price: number
+  timing: number
+  trust: number
+  wantsToThink: number
+  ghosted: number
+  other: number
+}
+
 export interface DailyGoal {
   id: string
   date: string
@@ -165,8 +182,77 @@ export interface DailyGoal {
   demos: number
   gatekeepersPassed: number
   shows: number
+  objections: ObjectionTally
+  closes: number
+  noCloses: number
+  noCloseReasons: NoCloseReasonTally
+  scriptVersion: string
   notes: string
   createdAt: string
+}
+
+export interface WeeklyReview {
+  id: string
+  weekStart: string
+  scriptChanges: string
+  leadsRemaining: number
+  bugsFixed: string
+  bugsOpen: string
+  hoursSales: number
+  hoursTech: number
+  hoursCollege: number
+  notes: string
+  createdAt: string
+}
+
+export type OnboardingStatus = "Pending" | "Delivered" | "Overdue"
+
+export interface Client {
+  id: string
+  name: string
+  clinic: string
+  closeDate: string
+  setupFee: number
+  mrr: number
+  onboardingStatus: OnboardingStatus
+  caseStudyRights: boolean
+  issues: string
+  createdAt: string
+}
+
+export type CollegeStatus = "Passing" | "At Risk" | "Clear"
+
+export interface MonthlyCheckpoint {
+  id: string
+  month: string
+  mrrTotal: number
+  churn: number
+  collegeStatus: CollegeStatus
+  notes: string
+  createdAt: string
+}
+
+export interface ScriptVersion {
+  version: string
+  content: string
+}
+
+export type BugStatus = "Open" | "Fixed"
+
+export interface BugItem {
+  id: string
+  title: string
+  status: BugStatus
+  date: string
+  detail: string
+}
+
+export interface Playbook {
+  scriptVersions: ScriptVersion[]
+  objectionsDoc: string
+  demoFlow: string
+  n8nSummary: string
+  bugs: BugItem[]
 }
 
 export interface Settings {
@@ -182,6 +268,10 @@ export interface Settings {
 export interface AppData {
   goals: Goal[]
   dailyGoals: DailyGoal[]
+  weeklyReviews: WeeklyReview[]
+  clients: Client[]
+  monthlyCheckpoints: MonthlyCheckpoint[]
+  playbook: Playbook
   habits: Habit[]
   journal: JournalEntry[]
   business: BusinessMetrics

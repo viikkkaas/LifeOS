@@ -1,4 +1,4 @@
-import type { Goal, Habit, BusinessMetrics, Investment, NetWorth, Settings, AppData, DailyGoal } from "@/types"
+import type { Goal, Habit, BusinessMetrics, Investment, NetWorth, Settings, AppData, DailyGoal, Playbook } from "@/types"
 
 export const DEFAULT_GOALS: Goal[] = [
   { id: "g1", name: "iPhone Pro", category: "Apple Ecosystem", targetPrice: 150000, amountSaved: 45000, priority: "High", targetYear: 2025, purchased: false, purchaseDate: null, notes: "Latest iPhone Pro Max with 1TB storage", imageUrl: "", tags: ["Want"], why: "Need the best tools for content creation", images: [], recurringSaving: 5000, recurringFrequency: "Monthly", deposits: [], createdAt: "", updatedAt: "", order: 0, locked: false },
@@ -18,6 +18,14 @@ export const DEFAULT_GOALS: Goal[] = [
 ]
 
 export const DEFAULT_DAILY_GOALS: DailyGoal[] = []
+
+export const DEFAULT_PLAYBOOK: Playbook = {
+  scriptVersions: [],
+  objectionsDoc: "",
+  demoFlow: "",
+  n8nSummary: "",
+  bugs: [],
+}
 
 export const DEFAULT_HABITS: Habit[] = [
   { id: "h1", name: "Gym", icon: "💪", streak: 0, lastCheckin: null, logs: [], createdAt: "" },
@@ -68,6 +76,10 @@ export const DEFAULT_SETTINGS: Settings = {
 export const DEFAULT_APP_DATA: AppData = {
   goals: DEFAULT_GOALS,
   dailyGoals: DEFAULT_DAILY_GOALS,
+  weeklyReviews: [],
+  clients: [],
+  monthlyCheckpoints: [],
+  playbook: DEFAULT_PLAYBOOK,
   habits: DEFAULT_HABITS,
   journal: [],
   business: DEFAULT_BUSINESS,

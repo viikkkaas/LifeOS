@@ -4,7 +4,9 @@ import React, { createContext, useContext, useReducer, useEffect, useCallback } 
 import type {
   AppData, Goal, Habit, JournalEntry,
   BusinessMetrics, Investment, NetWorth, Settings,
-  Achievement, Deposit, Stats, DailyGoal
+  Achievement, Deposit, Stats, DailyGoal,
+  WeeklyReview, Client, MonthlyCheckpoint, Playbook,
+  ScriptVersion, BugItem
 } from "@/types"
 import { DEFAULT_APP_DATA } from "@/lib/defaults"
 import { calculateProgress, generateId, getToday, getCurrencySymbol } from "@/lib/utils"
@@ -41,6 +43,21 @@ type Action =
   | { type: "ADD_DAILY_GOAL"; payload: DailyGoal }
   | { type: "UPDATE_DAILY_GOAL"; payload: DailyGoal }
   | { type: "DELETE_DAILY_GOAL"; payload: string }
+  | { type: "ADD_WEEKLY_REVIEW"; payload: WeeklyReview }
+  | { type: "UPDATE_WEEKLY_REVIEW"; payload: WeeklyReview }
+  | { type: "DELETE_WEEKLY_REVIEW"; payload: string }
+  | { type: "ADD_CLIENT"; payload: Client }
+  | { type: "UPDATE_CLIENT"; payload: Client }
+  | { type: "DELETE_CLIENT"; payload: string }
+  | { type: "ADD_MONTHLY_CHECKPOINT"; payload: MonthlyCheckpoint }
+  | { type: "UPDATE_MONTHLY_CHECKPOINT"; payload: MonthlyCheckpoint }
+  | { type: "DELETE_MONTHLY_CHECKPOINT"; payload: string }
+  | { type: "SAVE_SCRIPT_VERSION"; payload: ScriptVersion }
+  | { type: "DELETE_SCRIPT_VERSION"; payload: string }
+  | { type: "UPDATE_PLAYBOOK"; payload: Partial<Playbook> }
+  | { type: "ADD_BUG"; payload: BugItem }
+  | { type: "UPDATE_BUG"; payload: BugItem }
+  | { type: "DELETE_BUG"; payload: string }
   | { type: "RECALCULATE" }
 
 function calculateStats(data: AppData): Stats {
@@ -320,6 +337,112 @@ function appReducer(state: AppState, action: Action): AppState {
 
     case "DELETE_DAILY_GOAL": {
       newData = { ...state.data, dailyGoals: state.data.dailyGoals.filter(dg => dg.id !== action.payload) }
+      return { data: newData, stats: calculateStats(newData), initialized: true }
+    }
+
+    case "ADD_WEEKLY_REVIEW": {
+      newData = { ...state.data, weeklyReviews: [action.payload, ...state.data.weeklyReviews] }
+      return { data: newData, stats: calculateStats(newData), initialized: true }
+    }
+
+    case "UPDATE_WEEKLY_REVIEW": {
+      newData = {
+        ...state.data,
+        weeklyReviews: state.data.weeklyReviews.map(w => w.id === action.payload.id ? action.payload : w)
+      }
+      return { data: newData, stats: calculateStats(newData), initialized: true }
+    }
+
+    case "DELETE_WEEKLY_REVIEW": {
+      newData = { ...state.data, weeklyReviews: state.data.weeklyReviews.filter(w => w.id !== action.payload) }
+      return { data: newData, stats: calculateStats(newData), initialized: true }
+    }
+
+    case "ADD_CLIENT": {
+      newData = { ...state.data, clients: [...state.data.clients, action.payload] }
+      return { data: newData, stats: calculateStats(newData), initialized: true }
+    }
+
+    case "UPDATE_CLIENT": {
+      newData = {
+        ...state.data,
+        clients: state.data.clients.map(c => c.id === action.payload.id ? action.payload : c)
+      }
+      return { data: newData, stats: calculateStats(newData), initialized: true }
+    }
+
+    case "DELETE_CLIENT": {
+      newData = { ...state.data, clients: state.data.clients.filter(c => c.id !== action.payload) }
+      return { data: newData, stats: calculateStats(newData), initialized: true }
+    }
+
+    case "ADD_MONTHLY_CHECKPOINT": {
+      newData = { ...state.data, monthlyCheckpoints: [action.payload, ...state.data.monthlyCheckpoints] }
+      return { data: newData, stats: calculateStats(newData), initialized: true }
+    }
+
+    case "UPDATE_MONTHLY_CHECKPOINT": {
+      newData = {
+        ...state.data,
+        monthlyCheckpoints: state.data.monthlyCheckpoints.map(m => m.id === action.payload.id ? action.payload : m)
+      }
+      return { data: newData, stats: calculateStats(newData), initialized: true }
+    }
+
+    case "DELETE_MONTHLY_CHECKPOINT": {
+      newData = { ...state.data, monthlyCheckpoints: state.data.monthlyCheckpoints.filter(m => m.id !== action.payload) }
+      return { data: newData, stats: calculateStats(newData), initialized: true }
+    }
+
+    case "SAVE_SCRIPT_VERSION": {
+      const existing = state.data.playbook.scriptVersions.find(s => s.version === action.payload.version)
+      const scriptVersions = existing
+        ? state.data.playbook.scriptVersions.map(s => s.version === action.payload.version ? action.payload : s)
+        : [...state.data.playbook.scriptVersions, action.payload]
+      newData = { ...state.data, playbook: { ...state.data.playbook, scriptVersions } }
+      return { data: newData, stats: calculateStats(newData), initialized: true }
+    }
+
+    case "DELETE_SCRIPT_VERSION": {
+      newData = {
+        ...state.data,
+        playbook: {
+          ...state.data.playbook,
+          scriptVersions: state.data.playbook.scriptVersions.filter(s => s.version !== action.payload)
+        }
+      }
+      return { data: newData, stats: calculateStats(newData), initialized: true }
+    }
+
+    case "UPDATE_PLAYBOOK": {
+      newData = { ...state.data, playbook: { ...state.data.playbook, ...action.payload } }
+      return { data: newData, stats: calculateStats(newData), initialized: true }
+    }
+
+    case "ADD_BUG": {
+      newData = { ...state.data, playbook: { ...state.data.playbook, bugs: [...state.data.playbook.bugs, action.payload] } }
+      return { data: newData, stats: calculateStats(newData), initialized: true }
+    }
+
+    case "UPDATE_BUG": {
+      newData = {
+        ...state.data,
+        playbook: {
+          ...state.data.playbook,
+          bugs: state.data.playbook.bugs.map(b => b.id === action.payload.id ? action.payload : b)
+        }
+      }
+      return { data: newData, stats: calculateStats(newData), initialized: true }
+    }
+
+    case "DELETE_BUG": {
+      newData = {
+        ...state.data,
+        playbook: {
+          ...state.data.playbook,
+          bugs: state.data.playbook.bugs.filter(b => b.id !== action.payload)
+        }
+      }
       return { data: newData, stats: calculateStats(newData), initialized: true }
     }
 
