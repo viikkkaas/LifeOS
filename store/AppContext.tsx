@@ -8,7 +8,7 @@ import type {
   WeeklyReview, Client, MonthlyCheckpoint, Playbook,
   ScriptVersion, BugItem
 } from "@/types"
-import { DEFAULT_APP_DATA } from "@/lib/defaults"
+import { DEFAULT_APP_DATA, DEFAULT_HABITS, NEW_DEFAULT_HABIT_IDS } from "@/lib/defaults"
 import { calculateProgress, generateId, getToday, getCurrencySymbol } from "@/lib/utils"
 import confetti from "canvas-confetti"
 
@@ -29,6 +29,9 @@ type Action =
   | { type: "ADD_DEPOSIT"; payload: { goalId: string; deposit: Deposit } }
   | { type: "REORDER_GOALS"; payload: Goal[] }
   | { type: "ADD_HABIT_LOG"; payload: { habitId: string; date: string; completed: boolean } }
+  | { type: "ADD_HABIT"; payload: Habit }
+  | { type: "UPDATE_HABIT"; payload: Habit }
+  | { type: "DELETE_HABIT"; payload: string }
   | { type: "ADD_JOURNAL"; payload: JournalEntry }
   | { type: "UPDATE_JOURNAL"; payload: JournalEntry }
   | { type: "DELETE_JOURNAL"; payload: string }
@@ -147,6 +150,14 @@ function appReducer(state: AppState, action: Action): AppState {
     case "INIT": {
       // Merge stored data with defaults so new fields missing from old localStorage don't crash
       const merged: AppData = { ...DEFAULT_APP_DATA, ...action.payload }
+      // Append default habits introduced in newer versions so existing users get them too
+      if (merged.habits) {
+        const savedIds = new Set(merged.habits.map(h => h.id))
+        const missingHabits = DEFAULT_HABITS.filter(h => NEW_DEFAULT_HABIT_IDS.includes(h.id) && !savedIds.has(h.id))
+        if (missingHabits.length > 0) {
+          merged.habits = [...merged.habits, ...missingHabits]
+        }
+      }
       return { data: merged, stats: calculateStats(merged), initialized: true }
     }
 
@@ -252,6 +263,24 @@ function appReducer(state: AppState, action: Action): AppState {
           return { ...h, logs: newLogs, streak, lastCheckin: action.payload.completed ? getToday() : h.lastCheckin }
         })
       }
+      return { data: newData, stats: calculateStats(newData), initialized: true }
+    }
+
+    case "ADD_HABIT": {
+      newData = { ...state.data, habits: [...state.data.habits, action.payload] }
+      return { data: newData, stats: calculateStats(newData), initialized: true }
+    }
+
+    case "UPDATE_HABIT": {
+      newData = {
+        ...state.data,
+        habits: state.data.habits.map(h => h.id === action.payload.id ? action.payload : h)
+      }
+      return { data: newData, stats: calculateStats(newData), initialized: true }
+    }
+
+    case "DELETE_HABIT": {
+      newData = { ...state.data, habits: state.data.habits.filter(h => h.id !== action.payload) }
       return { data: newData, stats: calculateStats(newData), initialized: true }
     }
 

@@ -37,7 +37,15 @@ export const DEFAULT_HABITS: Habit[] = [
   { id: "h7", name: "Wake Up Early", icon: "🌅", streak: 0, lastCheckin: null, logs: [], createdAt: "" },
   { id: "h8", name: "Water Intake", icon: "💧", streak: 0, lastCheckin: null, logs: [], createdAt: "" },
   { id: "h9", name: "Sleep", icon: "😴", streak: 0, lastCheckin: null, logs: [], createdAt: "" },
+  { id: "h10", name: "Journaling / Planning", icon: "✍️", streak: 0, lastCheckin: null, logs: [], createdAt: "" },
+  { id: "h11", name: "No Junk Food", icon: "🥗", streak: 0, lastCheckin: null, logs: [], createdAt: "" },
+  { id: "h12", name: "Outreach (LinkedIn/Email)", icon: "📧", streak: 0, lastCheckin: null, logs: [], createdAt: "" },
+  { id: "h13", name: "Learning (15 min)", icon: "🎓", streak: 0, lastCheckin: null, logs: [], createdAt: "" },
+  { id: "h14", name: "Review Metrics", icon: "📊", streak: 0, lastCheckin: null, logs: [], createdAt: "" },
 ]
+
+// Default habits introduced in app updates — always merged into existing user data
+export const NEW_DEFAULT_HABIT_IDS = ["h10", "h11", "h12", "h13", "h14"]
 
 export const DEFAULT_BUSINESS: BusinessMetrics = {
   revenue: 1500000, mrr: 125000, clients: 12,

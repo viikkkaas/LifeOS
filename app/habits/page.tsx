@@ -5,7 +5,10 @@ import { useApp } from "@/store/AppContext"
 import Sidebar from "@/components/layout/Sidebar"
 import { motion } from "framer-motion"
 import { getToday } from "@/lib/utils"
-import { Flame, ChevronLeft, ChevronRight } from "lucide-react"
+import { Flame, ChevronLeft, ChevronRight, Plus, Edit3, Trash2 } from "lucide-react"
+import AddHabitModal from "@/components/modals/AddHabitModal"
+import toast from "react-hot-toast"
+import type { Habit } from "@/types"
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
@@ -13,6 +16,8 @@ export default function HabitsPage() {
   const { state, dispatch } = useApp()
   const { habits } = state.data
   const [weekOffset, setWeekOffset] = useState(0)
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [editingHabit, setEditingHabit] = useState<Habit | null>(null)
 
   const today = getToday()
 
@@ -43,6 +48,24 @@ export default function HabitsPage() {
   const getHabitStatus = (habitId: string, date: string): boolean => {
     const habit = habits.find(h => h.id === habitId)
     return habit?.logs.find(l => l.date === date)?.completed || false
+  }
+
+  const handleDelete = (habit: Habit) => {
+    if (state.data.settings.locked) { toast.error("Unlock settings to delete habits"); return }
+    dispatch({ type: "DELETE_HABIT", payload: habit.id })
+    toast.success("Habit deleted")
+  }
+
+  const handleOpenAdd = () => {
+    if (state.data.settings.locked) { toast.error("Unlock settings to add habits"); return }
+    setEditingHabit(null)
+    setShowAddModal(true)
+  }
+
+  const handleOpenEdit = (habit: Habit) => {
+    if (state.data.settings.locked) { toast.error("Unlock settings to edit habits"); return }
+    setEditingHabit(habit)
+    setShowAddModal(true)
   }
 
   return (
@@ -103,11 +126,25 @@ export default function HabitsPage() {
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: i * 0.03 }}
-                      className="grid grid-cols-[2fr_repeat(7,1fr)_80px] gap-2 items-center p-3 rounded-lg bg-white/[0.02] hover:bg-white/[0.04] transition-colors"
+                      className="grid grid-cols-[2fr_repeat(7,1fr)_80px] gap-2 items-center p-3 rounded-lg bg-white/[0.02] hover:bg-white/[0.04] transition-colors group"
                     >
                       <div className="flex items-center gap-2">
                         <span className="text-lg">{habit.icon}</span>
                         <span className="text-sm text-white/80 font-medium">{habit.name}</span>
+                        <div className="flex items-center gap-0.5 ml-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => handleOpenEdit(habit)}
+                            className="p-1 rounded hover:bg-white/10 text-white/30 hover:text-white/70 transition-colors"
+                          >
+                            <Edit3 size={12} />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(habit)}
+                            className="p-1 rounded hover:bg-white/10 text-white/30 hover:text-red-400 transition-colors"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
                       </div>
 
                         {weekDays.map(day => {
@@ -144,6 +181,21 @@ export default function HabitsPage() {
           </motion.div>
         </div>
       </main>
+
+      <button
+        onClick={handleOpenAdd}
+        className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 hover:scale-105 transition-all z-30 flex items-center justify-center"
+      >
+        <Plus size="24" />
+      </button>
+
+      {showAddModal && (
+        <AddHabitModal
+          onClose={() => setShowAddModal(false)}
+          dispatch={dispatch}
+          habit={editingHabit}
+        />
+      )}
     </div>
   )
 }
