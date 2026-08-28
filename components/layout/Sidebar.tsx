@@ -8,7 +8,7 @@ import {
   LayoutDashboard, Target, BarChart3, Settings, Calendar, Clock,
   BookOpen, CheckSquare, Trophy, TrendingUp, Wallet,
   Menu, X, ChevronDown, Briefcase, Phone, Users, CalendarCheck,
-  CalendarDays, ScrollText,
+  CalendarDays, ScrollText, Dumbbell, AlarmClock, Timer, PersonStanding,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -55,10 +55,20 @@ const groups: NavGroup[] = [
     ],
   },
   {
+    label: "Challenges",
+    icon: Dumbbell,
+    items: [
+      { href: "/75-hard", label: "75 Hard", icon: AlarmClock },
+      { href: "/75-hard-2", label: "75 Hard 2", icon: Timer },
+      { href: "/six-month-tracker", label: "Six-Month", icon: CalendarDays },
+    ],
+  },
+  {
     label: "Life",
     icon: CheckSquare,
     items: [
       { href: "/habits", label: "Habits", icon: CheckSquare },
+      { href: "/posture", label: "Posture", icon: PersonStanding },
       { href: "/journal", label: "Journal", icon: BookOpen },
       { href: "/timeline", label: "Timeline", icon: Clock },
       { href: "/calendar", label: "Calendar", icon: Calendar },
@@ -79,6 +89,7 @@ export default function Sidebar() {
     Sales: true,
     Money: true,
     Goals: true,
+    Challenges: true,
     Life: true,
   })
 
