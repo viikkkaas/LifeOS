@@ -44,6 +44,7 @@ const groups: NavGroup[] = [
       { href: "/net-worth", label: "Net Worth", icon: Wallet },
       { href: "/investments", label: "Investments", icon: TrendingUp },
       { href: "/business", label: "Business", icon: Briefcase },
+      { href: "/business/cra", label: "Cra Receptionist AI", icon: Phone },
       { href: "/analytics", label: "Analytics", icon: BarChart3 },
     ],
   },
