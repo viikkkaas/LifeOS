@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
@@ -9,8 +9,10 @@ import {
   BookOpen, CheckSquare, Trophy, TrendingUp, Wallet,
   Menu, X, ChevronDown, Briefcase, Phone, Users, CalendarCheck,
   CalendarDays, ScrollText, Dumbbell, AlarmClock, Timer, PersonStanding,
+  Cloud, CloudOff, LayoutGrid,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { getCurrentUser } from "@/lib/supabase"
 
 interface NavItem {
   href: string
@@ -56,6 +58,13 @@ const groups: NavGroup[] = [
     ],
   },
   {
+    label: "Command",
+    icon: LayoutGrid,
+    items: [
+      { href: "/command", label: "Projects Board", icon: LayoutGrid },
+    ],
+  },
+  {
     label: "Challenges",
     icon: Dumbbell,
     items: [
@@ -86,13 +95,19 @@ const standaloneItems: NavItem[] = [
 export default function Sidebar() {
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [syncEmail, setSyncEmail] = useState<string | null>(null)
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
     Sales: true,
     Money: true,
     Goals: true,
+    Command: true,
     Challenges: true,
     Life: true,
   })
+
+  useEffect(() => {
+    getCurrentUser().then(user => setSyncEmail(user?.email ?? null)).catch(() => setSyncEmail(null))
+  }, [])
 
   const toggleGroup = (label: string) => {
     setExpandedGroups(prev => ({ ...prev, [label]: !prev[label] }))
@@ -222,7 +237,31 @@ export default function Sidebar() {
         </nav>
 
         <div className="p-4 border-t border-white/[0.04] mt-2">
-          <div className="text-xs text-white/30 text-center">
+          <Link
+            href="/settings"
+            onClick={handleNav}
+            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs transition-colors hover:bg-white/[0.02]"
+            title="Cloud sync settings"
+          >
+            {syncEmail ? (
+              <>
+                <Cloud size={14} className="text-emerald-400 shrink-0" />
+                <div className="min-w-0">
+                  <div className="text-emerald-400/90 font-medium">Cloud sync on</div>
+                  <div className="text-white/30 truncate">{syncEmail}</div>
+                </div>
+              </>
+            ) : (
+              <>
+                <CloudOff size={14} className="text-white/30 shrink-0" />
+                <div className="min-w-0">
+                  <div className="text-white/50 font-medium">Cloud sync off</div>
+                  <div className="text-white/30">Sign in to sync</div>
+                </div>
+              </>
+            )}
+          </Link>
+          <div className="text-xs text-white/30 text-center mt-2">
             Track your goals, money, and life in one place.
           </div>
         </div>
