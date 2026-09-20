@@ -6,7 +6,7 @@ import type {
   BusinessMetrics, Investment, NetWorth, Settings,
   Achievement, Deposit, Stats, DailyGoal,
   WeeklyReview, Client, MonthlyCheckpoint, Playbook,
-  ScriptVersion, BugItem
+  ScriptVersion, BugItem, Project, Task, TaskStatus, InboxNote, Reminder
 } from "@/types"
 import { DEFAULT_APP_DATA, DEFAULT_HABITS, NEW_DEFAULT_HABIT_IDS } from "@/lib/defaults"
 import { calculateProgress, generateId, getToday, getCurrencySymbol } from "@/lib/utils"
@@ -62,6 +62,21 @@ type Action =
   | { type: "UPDATE_BUG"; payload: BugItem }
   | { type: "DELETE_BUG"; payload: string }
   | { type: "RECALCULATE" }
+  // Command Center
+  | { type: "ADD_PROJECT"; payload: Project }
+  | { type: "UPDATE_PROJECT"; payload: Project }
+  | { type: "DELETE_PROJECT"; payload: string }
+  | { type: "ADD_TASK"; payload: Task }
+  | { type: "UPDATE_TASK"; payload: Task }
+  | { type: "DELETE_TASK"; payload: string }
+  | { type: "MOVE_TASK"; payload: { taskId: string; status: TaskStatus } }
+  | { type: "ADD_INBOX_NOTE"; payload: InboxNote }
+  | { type: "DELETE_INBOX_NOTE"; payload: string }
+  | { type: "CONVERT_INBOX_NOTE"; payload: { noteId: string; type: "task" | "reminder"; id: string } }
+  | { type: "ADD_REMINDER"; payload: Reminder }
+  | { type: "UPDATE_REMINDER"; payload: Reminder }
+  | { type: "DELETE_REMINDER"; payload: string }
+  | { type: "TOGGLE_REMINDER"; payload: string }
 
 function calculateStats(data: AppData): Stats {
   const goals = data.goals
@@ -478,6 +493,111 @@ function appReducer(state: AppState, action: Action): AppState {
     case "RECALCULATE":
       return { ...state, stats: calculateStats(state.data) }
 
+    // ---- Command Center ----
+    case "ADD_PROJECT": {
+      newData = { ...state.data, projects: [...state.data.projects, action.payload] }
+      return { data: newData, stats: calculateStats(newData), initialized: true }
+    }
+
+    case "UPDATE_PROJECT": {
+      newData = {
+        ...state.data,
+        projects: state.data.projects.map(p => p.id === action.payload.id ? action.payload : p)
+      }
+      return { data: newData, stats: calculateStats(newData), initialized: true }
+    }
+
+    case "DELETE_PROJECT": {
+      newData = {
+        ...state.data,
+        projects: state.data.projects.filter(p => p.id !== action.payload),
+        tasks: state.data.tasks.map(t => t.projectId === action.payload ? { ...t, projectId: null } : t)
+      }
+      return { data: newData, stats: calculateStats(newData), initialized: true }
+    }
+
+    case "ADD_TASK": {
+      newData = { ...state.data, tasks: [...state.data.tasks, action.payload] }
+      return { data: newData, stats: calculateStats(newData), initialized: true }
+    }
+
+    case "UPDATE_TASK": {
+      newData = {
+        ...state.data,
+        tasks: state.data.tasks.map(t => t.id === action.payload.id ? action.payload : t)
+      }
+      return { data: newData, stats: calculateStats(newData), initialized: true }
+    }
+
+    case "DELETE_TASK": {
+      newData = {
+        ...state.data,
+        tasks: state.data.tasks.filter(t => t.id !== action.payload),
+        reminders: state.data.reminders.map(r => r.taskId === action.payload ? { ...r, taskId: null } : r)
+      }
+      return { data: newData, stats: calculateStats(newData), initialized: true }
+    }
+
+    case "MOVE_TASK": {
+      newData = {
+        ...state.data,
+        tasks: state.data.tasks.map(t =>
+          t.id === action.payload.taskId ? { ...t, status: action.payload.status, updatedAt: new Date().toISOString() } : t
+        )
+      }
+      return { data: newData, stats: calculateStats(newData), initialized: true }
+    }
+
+    case "ADD_INBOX_NOTE": {
+      newData = { ...state.data, inboxNotes: [action.payload, ...state.data.inboxNotes] }
+      return { data: newData, stats: calculateStats(newData), initialized: true }
+    }
+
+    case "DELETE_INBOX_NOTE": {
+      newData = { ...state.data, inboxNotes: state.data.inboxNotes.filter(n => n.id !== action.payload) }
+      return { data: newData, stats: calculateStats(newData), initialized: true }
+    }
+
+    case "CONVERT_INBOX_NOTE": {
+      newData = {
+        ...state.data,
+        inboxNotes: state.data.inboxNotes.map(n =>
+          n.id === action.payload.noteId
+            ? { ...n, convertedTo: action.payload.type, convertedId: action.payload.id }
+            : n
+        )
+      }
+      return { data: newData, stats: calculateStats(newData), initialized: true }
+    }
+
+    case "ADD_REMINDER": {
+      newData = { ...state.data, reminders: [...state.data.reminders, action.payload] }
+      return { data: newData, stats: calculateStats(newData), initialized: true }
+    }
+
+    case "UPDATE_REMINDER": {
+      newData = {
+        ...state.data,
+        reminders: state.data.reminders.map(r => r.id === action.payload.id ? action.payload : r)
+      }
+      return { data: newData, stats: calculateStats(newData), initialized: true }
+    }
+
+    case "DELETE_REMINDER": {
+      newData = { ...state.data, reminders: state.data.reminders.filter(r => r.id !== action.payload) }
+      return { data: newData, stats: calculateStats(newData), initialized: true }
+    }
+
+    case "TOGGLE_REMINDER": {
+      newData = {
+        ...state.data,
+        reminders: state.data.reminders.map(r =>
+          r.id === action.payload ? { ...r, completed: !r.completed } : r
+        )
+      }
+      return { data: newData, stats: calculateStats(newData), initialized: true }
+    }
+
     default:
       return state
   }
@@ -498,22 +618,55 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   })
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem("lifeos_data")
-      if (saved) {
-        const parsed = JSON.parse(saved) as AppData
-        dispatch({ type: "INIT", payload: parsed })
-      } else {
+    async function loadData() {
+      try {
+        // Try to load from Supabase first if user is authenticated
+        const { loadFromSupabase } = await import("@/lib/supabase")
+        const supabaseData = await loadFromSupabase()
+
+        if (supabaseData) {
+          console.log("Loaded data from Supabase")
+          dispatch({ type: "INIT", payload: supabaseData })
+          // Also save to localStorage as backup
+          localStorage.setItem("lifeos_data", JSON.stringify(supabaseData))
+          return
+        }
+      } catch (err) {
+        console.log("Supabase load failed, falling back to localStorage:", err)
+      }
+
+      // Fallback to localStorage
+      try {
+        const saved = localStorage.getItem("lifeos_data")
+        if (saved) {
+          const parsed = JSON.parse(saved) as AppData
+          dispatch({ type: "INIT", payload: parsed })
+        } else {
+          dispatch({ type: "INIT", payload: DEFAULT_APP_DATA })
+        }
+      } catch {
         dispatch({ type: "INIT", payload: DEFAULT_APP_DATA })
       }
-    } catch {
-      dispatch({ type: "INIT", payload: DEFAULT_APP_DATA })
     }
+    loadData()
   }, [])
 
   useEffect(() => {
     if (state.initialized) {
+      // Save to localStorage immediately
       localStorage.setItem("lifeos_data", JSON.stringify(state.data))
+
+      // Debounced sync to Supabase (background, non-blocking)
+      const syncTimer = setTimeout(async () => {
+        try {
+          const { syncToSupabase } = await import("@/lib/supabase")
+          await syncToSupabase(state.data)
+        } catch (err) {
+          console.log("Background Supabase sync failed:", err)
+        }
+      }, 1000)
+
+      return () => clearTimeout(syncTimer)
     }
   }, [state.data, state.initialized])
 

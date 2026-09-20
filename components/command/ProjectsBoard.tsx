@@ -345,8 +345,8 @@ export function ProjectsBoard() {
                         </div>
                       </div>
                     </div>
-                  ))}
-                )}
+                  )))
+                }
               </div>
             </div>
           ))}
