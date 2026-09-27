@@ -54,3 +54,15 @@ export async function loadFromSupabase() {
     return null
   }
 }
+
+export async function getCurrentUser() {
+  try {
+    const supabase = getSupabase()
+    if (!supabase) return null
+
+    const { data: { user } } = await supabase.auth.getUser()
+    return user
+  } catch {
+    return null
+  }
+}
