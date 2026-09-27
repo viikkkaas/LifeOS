@@ -56,19 +56,19 @@ export default function GoalCard({ goal, symbol, dispatch, locked }: GoalCardPro
 
   return (
     <>
-      <div className={`card p-5 relative overflow-hidden group transition-all duration-300 ${goal.purchased ? 'opacity-70' : ''} ${unrealistic ? 'border-amber-500/20' : ''}`}>
-        {/* Top gradient line */}
-        <div className={`absolute top-0 left-0 right-0 h-0.5 ${
+      <div className={`card-shell group transition-all duration-300 ${goal.purchased ? 'opacity-70' : ''} ${unrealistic ? 'ring ring-opacity-5' : ''}`}>
+        {/* Top gradient line (outer shell accent) */}
+        <div className={`absolute top-0 left-0 right-0 h-1.5 ${
           goal.purchased ? 'bg-emerald-500/50' :
           unrealistic ? 'bg-amber-500/50' :
           progress >= 100 ? 'bg-green-500/50' :
           progress >= 50 ? 'bg-purple-500/50' :
-          'bg-white/5'
+          'rgba(255,255,255,0.02)'
         }`} />
 
         {/* Lock indicator */}
         {goal.locked && (
-          <div className="absolute top-3 right-3 text-white/20">
+          <div className="absolute top-3 right-3 text-white/10">
             <Lock size={14} />
           </div>
         )}
@@ -78,9 +78,9 @@ export default function GoalCard({ goal, symbol, dispatch, locked }: GoalCardPro
           </div>
         )}
 
-        <div className="relative">
+        <div className="card-core relative">
           {/* Header */}
-          <div className="flex items-start justify-between mb-2">
+          <div className="flex items-start justify-between mb-3">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-white/40 uppercase tracking-wider">
@@ -98,26 +98,26 @@ export default function GoalCard({ goal, symbol, dispatch, locked }: GoalCardPro
 
           {/* Why */}
           {goal.why && (
-            <p className="text-xs text-white/30 mb-3 line-clamp-2"><span className="text-white/20 font-medium">Why: </span>{goal.why}</p>
+            <p className="text-xs text-white/30 mb-3 line-clamp-2 font-mono"><span className="text-white/20 font-medium">Why: </span>{goal.why}</p>
           )}
 
           {/* Progress Bar */}
-          <div className="mb-3">
-            <div className="flex items-center justify-between text-xs mb-1.5">
+          <div className="mb-4">
+            <div className="flex items-center justify-between text-xs mb-1.5 font-mono">
               <span className="text-white/60">{formatCompactCurrency(goal.amountSaved, symbol)}</span>
               <span className="text-white/40">of {formatCompactCurrency(goal.targetPrice, symbol)}</span>
               <span className="font-semibold text-white/80">{progress}%</span>
             </div>
-            <div className="progress-bar h-2">
+            <div className="progress-bar h-2 rounded-full">
               <div
-                className={`progress-bar-fill ${goal.purchased ? 'green' : progress >= 100 ? 'green' : ''}`}
+                className={`progress-bar-fill rounded-full ${goal.purchased ? 'green' : progress >= 100 ? 'green' : ''} transition-colors`}
                 style={{ width: `${Math.min(progress, 100)}%` }}
               />
             </div>
           </div>
 
           {/* Info Row */}
-          <div className="flex items-center justify-between text-xs text-white/40 mb-1">
+          <div className="flex items-center justify-between text-xs text-white/40 mb-2 font-mono">
             <span>Priority: <span className={`font-medium ${
               goal.priority === "Critical" ? "text-red-400" :
               goal.priority === "High" ? "text-amber-400" :
@@ -128,7 +128,7 @@ export default function GoalCard({ goal, symbol, dispatch, locked }: GoalCardPro
           </div>
 
           {/* Remaining + Countdown */}
-          <div className="text-xs text-white/40 mb-3">
+          <div className="text-xs text-white/40 mb-3 font-mono">
             <span>Remaining: {formatCompactCurrency(remaining, symbol)}</span>
             {monthsNeeded && monthsNeeded > 0 && (
               <span className="ml-3 text-purple-300">
@@ -139,24 +139,24 @@ export default function GoalCard({ goal, symbol, dispatch, locked }: GoalCardPro
 
           {/* Purchase status */}
           {goal.purchased && goal.purchaseDate && (
-            <div className="mb-3 text-xs text-emerald-400 font-medium">
+            <div className="mb-3 text-xs text-emerald-400 font-medium font-mono">
               ✓ Purchased on {new Date(goal.purchaseDate).toLocaleDateString()}
             </div>
           )}
 
           {/* Deposits count */}
           {goal.deposits.length > 0 && (
-            <div className="text-[10px] text-white/30 mb-3">
+            <div className="text-[10px] text-white/30 mb-3 font-mono">
               {goal.deposits.length} deposit{goal.deposits.length > 1 ? 's' : ''} logged
             </div>
           )}
 
-          {/* Action Buttons */}
+          {/* Action Buttons - Bottom Aligned in Core */}
           <div className="flex items-center gap-1.5 pt-2 border-t border-white/[0.04]">
             {!goal.purchased && (
               <button
                 onClick={() => { if (locked) { toast.error("Unlock settings to edit"); return }; setShowEdit(true) }}
-                className="p-1.5 rounded hover:bg-white/5 text-white/30 hover:text-white/70 transition-colors"
+                className="p-1.5 rounded hover:bg-white/5 text-white/30 hover:text-white/70 transition-colors font-mono text-xs"
                 title="Edit"
               >
                 <Edit3 size="14" />
@@ -165,7 +165,7 @@ export default function GoalCard({ goal, symbol, dispatch, locked }: GoalCardPro
             {!goal.purchased && (
               <button
                 onClick={handleDuplicate}
-                className="p-1.5 rounded hover:bg-white/5 text-white/30 hover:text-white/70 transition-colors"
+                className="p-1.5 rounded hover:bg-white/5 text-white/30 hover:text-white/70 transition-colors font-mono text-xs"
                 title="Duplicate"
               >
                 <Copy size="14" />
@@ -173,7 +173,7 @@ export default function GoalCard({ goal, symbol, dispatch, locked }: GoalCardPro
             )}
             <button
               onClick={handleDelete}
-              className="p-1.5 rounded hover:bg-red-500/10 text-white/30 hover:text-red-400 transition-colors"
+              className="p-1.5 rounded hover:bg-red-500/10 text-white/30 hover:text-red-400 transition-colors font-mono text-xs"
               title="Delete"
             >
               <Trash2 size="14" />
@@ -181,7 +181,7 @@ export default function GoalCard({ goal, symbol, dispatch, locked }: GoalCardPro
             {!goal.purchased && (
               <button
                 onClick={handleMarkPurchased}
-                className="p-1.5 rounded hover:bg-emerald-500/10 text-white/30 hover:text-emerald-400 transition-colors"
+                className="p-1.5 rounded hover:bg-emerald-500/10 text-white/30 hover:text-emerald-400 transition-colors font-mono text-xs"
                 title="Mark as Purchased"
               >
                 <CheckCircle size="14" />
@@ -190,7 +190,7 @@ export default function GoalCard({ goal, symbol, dispatch, locked }: GoalCardPro
             {!goal.purchased && (
               <button
                 onClick={() => setShowDeposit(true)}
-                className="ml-auto p-1.5 rounded hover:bg-white/5 text-white/30 hover:text-white/70 transition-colors"
+                className="ml-auto p-1.5 rounded hover:bg-white/5 text-white/30 hover:text-white/70 transition-colors font-mono text-xs"
                 title="Add Deposit"
               >
                 <Plus size="14" />

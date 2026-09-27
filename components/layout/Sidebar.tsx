@@ -10,6 +10,7 @@ import {
   Menu, X, ChevronDown, Briefcase, Phone, Users, CalendarCheck,
   CalendarDays, ScrollText, Dumbbell, AlarmClock, Timer, PersonStanding,
   Cloud, CloudOff, LayoutGrid,
+  Lock, Unlock,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { getCurrentUser } from "@/lib/supabase"
@@ -133,13 +134,13 @@ export default function Sidebar() {
         href={item.href}
         onClick={onClick}
         className={cn(
-          "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+          "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200",
           active
-            ? "bg-gradient-to-r from-[#667eea]/10 to-[#764ba2]/10 text-white border border-white/[0.06]"
-            : "text-white/50 hover:text-white/80 hover:bg-white/[0.02]"
+            ? "text-white bg-gradient-to-r from-indigo-500/15 to-purple-500/15 border border-white/[0.08]"
+            : "text-white/60 hover:text-white/90 hover:bg-white/[0.03] transition-colors"
         )}
       >
-        <item.icon size={18} className={active ? "text-[#667eea]" : "shrink-0"} />
+        <item.icon size={18} className={active ? "text-indigo-400" : "shrink-0"} />
         {item.label}
       </Link>
     )
@@ -170,41 +171,41 @@ export default function Sidebar() {
 
       <aside className={cn(
         "fixed top-0 left-0 z-50 h-full w-64",
-        "bg-[#0a0a0f] border-r border-white/[0.04]",
+        "bg-[#0a0a0a] border-r border-white/[0.05]",
         "transform transition-transform duration-300 lg:translate-x-0",
         "overflow-y-auto overflow-x-hidden",
         mobileOpen ? "translate-x-0" : "-translate-x-full"
       )}>
-        <div className="flex items-center justify-between p-5 border-b border-white/[0.04]">
-          <Link href="/" className="flex items-center gap-2.5" onClick={handleNav}>
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#667eea] to-[#764ba2] flex items-center justify-center">
+        <div className="flex items-center justify-between p-6 border-b border-white/[0.05]">
+          <Link href="/" className="flex items-center gap-3" onClick={handleNav}>
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
               <span className="text-white font-bold text-sm">L</span>
             </div>
-            <span className="font-semibold text-lg tracking-tight text-white">
+            <span className="font-semibold text-xl tracking-tight text-white font-mono">
               LifeOS
             </span>
           </Link>
-          <button onClick={() => setMobileOpen(false)} className="lg:hidden p-1 rounded hover:bg-white/5">
-            <X size={18} className="text-white/60" />
+          <button onClick={() => setMobileOpen(false)} className="lg:hidden p-1 rounded hover:bg-white/[0.03]">
+            <X size={18} className="text-white/50" />
           </button>
         </div>
 
-        <nav className="p-3 space-y-1">
+        <nav className="p-5 space-y-2">
           {standaloneItems.map(item => navLink(item, handleNav))}
 
           {groups.map(group => {
             const groupActive = isGroupActive(group)
             const expanded = expandedGroups[group.label]
             return (
-              <div key={group.label} className="pt-2">
+              <div key={group.label} className="pt-3">
                 <button
                   onClick={() => toggleGroup(group.label)}
                   className={cn(
-                    "flex items-center justify-between w-full px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors",
-                    groupActive ? "text-white/60" : "text-white/30 hover:text-white/50"
+                    "flex items-center justify-between w-full px-4 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors",
+                    groupActive ? "text-indigo-400" : "text-white/40 hover:text-indigo-500"
                   )}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3">
                     <group.icon size={14} />
                     <span>{group.label}</span>
                   </div>
@@ -225,7 +226,7 @@ export default function Sidebar() {
                       transition={{ duration: 0.2, ease: "easeInOut" }}
                       className="overflow-hidden"
                     >
-                      <div className="pl-2 pt-0.5 space-y-0.5">
+                      <div className="pl-3 pt-1 space-y-1">
                         {group.items.map(item => navLink(item, handleNav))}
                       </div>
                     </motion.div>
@@ -236,32 +237,20 @@ export default function Sidebar() {
           })}
         </nav>
 
-        <div className="p-4 border-t border-white/[0.04] mt-2">
+        <div className="p-6 border-t border-white/[0.05] mt-6">
           <Link
             href="/settings"
             onClick={handleNav}
-            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs transition-colors hover:bg-white/[0.02]"
+            className="flex items-center gap-3 px-4 py-3 rounded-lg text-xs transition-colors hover:bg-white/[0.03] text-white/50 font-medium"
             title="Cloud sync settings"
           >
-            {syncEmail ? (
-              <>
-                <Cloud size={14} className="text-emerald-400 shrink-0" />
-                <div className="min-w-0">
-                  <div className="text-emerald-400/90 font-medium">Cloud sync on</div>
-                  <div className="text-white/30 truncate">{syncEmail}</div>
-                </div>
-              </>
-            ) : (
-              <>
-                <CloudOff size={14} className="text-white/30 shrink-0" />
-                <div className="min-w-0">
-                  <div className="text-white/50 font-medium">Cloud sync off</div>
-                  <div className="text-white/30">Sign in to sync</div>
-                </div>
-              </>
-            )}
+            <Cloud size={14} className="text-indigo-400 shrink-0" />
+            <div className="min-w-0">
+              <div className="text-indigo-400/90 font-medium">Cloud sync on</div>
+              <div className="text-white/30 truncate">{syncEmail ?? "No user"}</div>
+            </div>
           </Link>
-          <div className="text-xs text-white/30 text-center mt-2">
+          <div className="text-xs text-white/30 text-center mb-2 font-mono">
             Track your goals, money, and life in one place.
           </div>
         </div>

@@ -28,34 +28,26 @@ function GoalsPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
+    <div className="min-h-screen bg-black font-sans">
       <Sidebar />
       <main className="lg:pl-64">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7 }}
           >
-            <div className="flex gap-1 mb-8 p-1 rounded-xl bg-white/[0.03] border border-white/[0.04] w-fit">
+            <Tabs navClass="grid gap-2 bg-white/[0.03] border-b border-white/[0.05]">
               {tabs.map(tab => {
                 const isActive = activeTab === tab.id
                 return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setTab(tab.id)}
-                    className={cn(
-                      "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all",
-                      isActive
-                        ? "bg-gradient-to-r from-[#667eea]/10 to-[#764ba2]/10 text-white border border-white/[0.06] shadow-sm"
-                        : "text-white/40 hover:text-white/70"
-                    )}
-                  >
-                    <tab.icon size={16} />
+                  <TabButton key={tab.id} active={isActive} onClick={() => setTab(tab.id)}>
+                    <TabIcon size={16}>{tab.icon}</TabIcon>
                     {tab.label}
-                  </button>
+                  </TabButton>
                 )
               })}
-            </div>
+            </Tabs>
 
             {activeTab === "list" && <GoalsListView />}
             {activeTab === "wall" && <DreamWallView />}
@@ -70,8 +62,50 @@ function GoalsPageContent() {
 
 export default function GoalsPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[var(--background)]" />}>
+    <Suspense fallback={<div className="min-h-screen bg-black font-sans" />}>
       <GoalsPageContent />
     </Suspense>
+  )
+}
+
+interface TabButtonProps {
+  active: boolean
+  onClick: () => void
+  children: React.ReactNode
+}
+
+interface TabIconProps {
+  size?: number
+  children: React.ReactNode
+}
+
+interface TabsProps {
+  navClass?: string
+  children: React.ReactNode
+}
+
+function Tabs({ navClass = "grid gap-2 mb-12", children }: TabsProps) {
+  return <nav className={navClass}>{children}</nav>
+}
+
+function TabButton({ active, onClick, children }: TabButtonProps) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "flex flex-col items-center justify-center rounded-lg px-4 py-3 text-xs font-medium transition-all",
+        active
+          ? "text-white bg-indigo-600/15 border-b border-indigo-500/30 group-hover:text-indigo-400 group-hover:border-indigo-500/50"
+          : "text-white/60 hover:text-indigo-400 hover:bg-indigo-600/10 transition-colors"
+      )}
+    >
+      {children}
+    </button>
+  )
+}
+
+function TabIcon({ size = 20, children }: TabIconProps) {
+  return (
+    <span className={`text-indigo-400 mb-1 transition-transform group-hover:text-indigo-200 group-hover:scale-110 transition-transform ${size >= 16 ? "text-lg" : "text-md"}`}>{children}</span>
   )
 }
